@@ -35,6 +35,7 @@ public class SendArpRequest {
   private static final String SNAPLEN_KEY = SendArpRequest.class.getName() + ".snaplen";
   private static final int SNAPLEN = Integer.getInteger(SNAPLEN_KEY, 65536); // [bytes]
 
+//  private static final MacAddress SRC_MAC_ADDR = MacAddress.getByName("30:9C:23:41:26:EA");
   private static final MacAddress SRC_MAC_ADDR = MacAddress.getByName("fe:00:01:02:03:04");
 
   private static MacAddress resolvedAddr;

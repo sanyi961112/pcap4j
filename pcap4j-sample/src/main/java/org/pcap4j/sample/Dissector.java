@@ -32,11 +32,6 @@ public class Dissector {
 
         String filter = args.length != 0 ? args[0] : "";
 
-//        System.out.println(COUNT_KEY + ": " + COUNT);
-//        System.out.println(READ_TIMEOUT_KEY + ": " + READ_TIMEOUT);
-//        System.out.println(SNAPLEN_KEY + ": " + SNAPLEN);
-//        System.out.println("\n");
-
         // CHOOSE INTERFACE
         PcapNetworkInterface nif;
         try {
@@ -69,7 +64,7 @@ public class Dissector {
         }
 
         PcapStat ps = handle.getStats();
-        System.out.println("ps_recieved: " + ps.getNumPacketsReceived());
+        System.out.println("ps_received: " + ps.getNumPacketsReceived());
         System.out.println("ps_dropped: " + ps.getNumPacketsDropped());
         System.out.println("ps_ifdropped: " + ps.getNumPacketsDroppedByIf());
         if (Platform.isWindows()) {

@@ -16,7 +16,7 @@ import org.pcap4j.util.NifSelector;
 public class Dump {
 
   private static final String COUNT_KEY = Dump.class.getName() + ".count";
-  private static final int COUNT = Integer.getInteger(COUNT_KEY, 5);
+  private static final int COUNT = Integer.getInteger(COUNT_KEY, 100);
 
   private static final String READ_TIMEOUT_KEY = Dump.class.getName() + ".readTimeout";
   private static final int READ_TIMEOUT = Integer.getInteger(READ_TIMEOUT_KEY, 10); // [ms]
@@ -30,7 +30,7 @@ public class Dump {
       Boolean.getBoolean(TIMESTAMP_PRECISION_NANO_KEY);
 
   private static final String PCAP_FILE_KEY = Dump.class.getName() + ".pcapFile";
-  private static final String PCAP_FILE = System.getProperty(PCAP_FILE_KEY, "Dump.pcap");
+  private static final String PCAP_FILE = System.getProperty(PCAP_FILE_KEY, "Dumpbig.pcap");
 
   private Dump() {}
 
@@ -72,11 +72,15 @@ public class Dump {
     int num = 0;
     PcapDumper dumper = handle.dumpOpen(PCAP_FILE);
     while (true) {
-      Packet packet = handle.getNextPacket();
+      byte[] packet = handle.getNextRawPacket();
       if (packet == null) {
         continue;
       } else {
-        dumper.dump(packet, handle.getTimestamp());
+        System.out.println(packet);
+//        Class valami = packet.getClass();
+//        System.out.println(valami);
+//        packet.getHeader();
+//        dumper.dump(packet, handle.getTimestamp());
         num++;
         if (num >= COUNT) {
           break;

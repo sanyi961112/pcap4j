@@ -617,8 +617,7 @@ public final class PcapHandle implements Closeable {
       return null;
     }
 
-    return PacketFactories.getFactory(Packet.class, DataLinkType.class)
-        .newInstance(ba, 0, ba.length, dlt);
+    return PacketFactories.getFactory(Packet.class, DataLinkType.class).newInstance(ba, 0, ba.length, dlt);
   }
 
   /**

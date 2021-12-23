@@ -10,14 +10,14 @@ import org.pcap4j.core.PcapNativeException;
 import org.pcap4j.core.PcapNetworkInterface;
 import org.pcap4j.core.PcapNetworkInterface.PromiscuousMode;
 import org.pcap4j.core.PcapStat;
-import org.pcap4j.packet.Packet;
+import org.pcap4j.packet.*;
 import org.pcap4j.util.NifSelector;
 
 @SuppressWarnings("javadoc")
 public class Loop {
 
   private static final String COUNT_KEY = Loop.class.getName() + ".count";
-  private static final int COUNT = Integer.getInteger(COUNT_KEY, 5);
+  private static final int COUNT = Integer.getInteger(COUNT_KEY,  5000);
 
   private static final String READ_TIMEOUT_KEY = Loop.class.getName() + ".readTimeout";
   private static final int READ_TIMEOUT = Integer.getInteger(READ_TIMEOUT_KEY, 10); // [ms]
@@ -59,8 +59,13 @@ public class Loop {
         new PacketListener() {
           @Override
           public void gotPacket(Packet packet) {
-            System.out.println(handle.getTimestamp());
             System.out.println(packet);
+//            System.out.println("Listening...");
+//            if (packet.contains(ArpPacket.class)) {
+//              System.out.println("Arp packet found");
+//            } else if (packet.contains(UdpPacket.class)){
+//              System.out.println("Udp packet found");
+//            }
           }
         };
 

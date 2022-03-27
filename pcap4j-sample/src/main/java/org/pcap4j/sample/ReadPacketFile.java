@@ -16,7 +16,7 @@ public class ReadPacketFile {
 
   private static final String PCAP_FILE_KEY = ReadPacketFile.class.getName() + ".pcapFile";
   private static final String PCAP_FILE =
-      System.getProperty(PCAP_FILE_KEY, "src/main/resources/echoAndEchoReply.pcap");
+      System.getProperty(PCAP_FILE_KEY, "C:/Users/sanyi/Desktop/pcap4j/pcap4j-sample/src/main/resources/dhcp.pcap");
 
   private ReadPacketFile() {}
 

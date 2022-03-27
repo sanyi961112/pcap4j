@@ -55,16 +55,29 @@ public class Loop {
       handle.setFilter(filter, BpfCompileMode.OPTIMIZE);
     }
 
-    PacketListener listener =
-        new PacketListener() {
+
+    PacketListener listener = new PacketListener() {
           @Override
           public void gotPacket(Packet packet) {
-            System.out.println(packet);
-//            System.out.println("Listening...");
-//            if (packet.contains(ArpPacket.class)) {
-//              System.out.println("Arp packet found");
-//            } else if (packet.contains(UdpPacket.class)){
+            if (packet.contains(ArpPacket.class)) {
+              System.out.println("Arp packet found");
+              System.out.println(packet);
+            }
+            if (packet.contains(RarpPacket.class)) {
+              System.out.println("Reverse Arp packet found");
+              System.out.println(packet);
+            }
+//            if (packet.contains(UdpPacket.class)){
 //              System.out.println("Udp packet found");
+//              System.out.println(packet);
+//            }
+//            if (packet.contains(IcmpV4CommonPacket.class)) {
+//              System.out.println("icmpv4 packet found");
+//              System.out.println(packet);
+//            }
+//            if (packet.contains(IcmpV6CommonPacket.class)){
+//              System.out.println("icmpv6 packet found");
+//              System.out.println(packet);
 //            }
           }
         };

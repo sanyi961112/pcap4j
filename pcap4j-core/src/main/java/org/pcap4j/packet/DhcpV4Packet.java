@@ -74,7 +74,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     }
 
     @Override
-    DhcpV4Header getHeader() {
+    public DhcpV4Header getHeader() {
         return header;
     }
 
@@ -262,7 +262,7 @@ public final class DhcpV4Packet extends AbstractPacket {
 
         private final Number operationCode;
         private final byte hardwareType;
-        private byte hardwareAddressLength;
+        private final byte hardwareAddressLength;
         private final Number hops;
         private final byte transactionIdentifier;
         private final Number seconds;

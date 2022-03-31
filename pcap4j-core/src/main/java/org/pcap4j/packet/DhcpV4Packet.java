@@ -106,7 +106,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         }
 
         private Builder(DhcpV4Packet packet) {
-            this.operationCode = packet.header.operationCode;
+            this.operationCode = (byte) packet.header.operationCode;
             this.hardwareType = packet.header.hardwareType;
             this.hardwareAddressLength = packet.header.hardwareAddressLength;
             this.hops = packet.header.hops;
@@ -119,7 +119,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.chaddr = packet.header.chaddr;
             this.sname = packet.header.sname;
             this.file = packet.header.file;
-            this.options = packet.header.options;
+            this.options = (byte) packet.header.options;
         }
 
         public Builder operationCode(byte operation) {
@@ -205,6 +205,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     public static final class DhcpV4Header extends AbstractHeader {
         private static final long serialVersionUID = -6744946102881067232L;
 
+        /*(D)iscover, (R)equest, (O)ffer and (A)cknowledge*/
         /**
          * DHCPv4 MESSAGE FORMAT
          * Operation Code (1 byte)
@@ -330,9 +331,7 @@ public final class DhcpV4Packet extends AbstractPacket {
 
         /*Getters*/
         public byte getOperationCode() { return (byte) operationCode; }
-        public byte getHardwareType() {
-            return hardwareType;
-        }
+        public byte getHardwareType() { return hardwareType; }
         public byte getHardwareAddressLength() { return hardwareAddressLength; }
         public byte getHops() { return (byte) hops; }
         public byte getTransactionIdentifier() { return (byte) transactionIdentifier; }
@@ -350,15 +349,21 @@ public final class DhcpV4Packet extends AbstractPacket {
         @Override
         protected List<byte[]> getRawFields() {
             List<byte[]> rawFields = new ArrayList<byte[]>();
-            rawFields.add(ByteArrays.toByteArray(operationCode.value()));
-            rawFields.add(ByteArrays.toByteArray(hardwareType.value()));
+            rawFields.add(ByteArrays.toByteArray(operationCode.intValue()));
+            rawFields.add(ByteArrays.toByteArray(hardwareType));
             rawFields.add(ByteArrays.toByteArray(hardwareAddressLength));
             rawFields.add(ByteArrays.toByteArray(hops.byteValue()));
-            rawFields.add(ByteArrays.toByteArray(operation.value()));
-            rawFields.add(ByteArrays.toByteArray(srcHardwareAddr));
-            rawFields.add(ByteArrays.toByteArray(srcProtocolAddr));
-            rawFields.add(ByteArrays.toByteArray(dstHardwareAddr));
-            rawFields.add(ByteArrays.toByteArray(dstProtocolAddr));
+            rawFields.add(ByteArrays.toByteArray(transactionIdentifier));
+            rawFields.add(ByteArrays.toByteArray(seconds.intValue()));
+            rawFields.add(ByteArrays.toByteArray(flags));
+            rawFields.add(ByteArrays.toByteArray(ciaddr));
+            rawFields.add(ByteArrays.toByteArray(yiaddr));
+            rawFields.add(ByteArrays.toByteArray(siaddr));
+            rawFields.add(ByteArrays.toByteArray(giaddr));
+            rawFields.add(ByteArrays.toByteArray(chaddr));
+            rawFields.add(ByteArrays.toByteArray(sname));
+            rawFields.add(ByteArrays.toByteArray(file));
+            rawFields.add(ByteArrays.toByteArray(options));
             return rawFields;
         }
 
@@ -375,9 +380,19 @@ public final class DhcpV4Packet extends AbstractPacket {
             sb.append("[DHCPv4 Header (").append(length()).append(" bytes)]").append(ls);
             sb.append("  Operation Code: ").append(operationCode).append(ls);
             sb.append("  Hardware type: ").append(hardwareType).append(ls);
-            /**
-             * TODO finish build string
-             */
+            sb.append("  Hardware address length: ").append(hardwareAddressLength).append(ls);
+            sb.append("  Hops: ").append(hops).append(ls);
+            sb.append("  TransactionIdentifier: ").append(transactionIdentifier).append(ls);
+            sb.append("  seconds: ").append(seconds).append(ls);
+            sb.append("  flags: ").append(flags).append(ls);
+            sb.append("  ciaddr: ").append(ciaddr).append(ls);
+            sb.append("  yiaddr: ").append(yiaddr).append(ls);
+            sb.append("  siaddr: ").append(siaddr).append(ls);
+            sb.append("  giaddr: ").append(giaddr).append(ls);
+            sb.append("  chaddr: ").append(chaddr).append(ls);
+            sb.append("  sname: ").append(sname).append(ls);
+            sb.append("  file: ").append(file).append(ls);
+            sb.append("  options: ").append(options).append(ls);
 
             return sb.toString();
         }
@@ -392,19 +407,44 @@ public final class DhcpV4Packet extends AbstractPacket {
             }
 
             DhcpV4Packet.DhcpV4Header other = (DhcpV4Packet.DhcpV4Header) obj;
+            return operationCode.equals(other.getOperationCode())
+                    && hardwareType == other.hardwareType
+                    && hardwareAddressLength == other.hardwareAddressLength
+                    && hops.equals(other.hops)
+                    && transactionIdentifier == other.transactionIdentifier
+                    && seconds.equals(other.seconds)
+                    && flags == (other.flags)
+                    && ciaddr.equals(other.ciaddr)
+                    && yiaddr.equals(other.yiaddr)
+                    && siaddr.equals(other.siaddr)
+                    && giaddr.equals(other.giaddr)
+                    && chaddr.equals(other.chaddr)
+                    && sname == (other.sname)
+                    && file == (other.file)
+                    && options == (other.options);
             /**
-             * TODO equals function
+             * TODO equals function: fix types of these header values on creation
              */
-            return true;
         }
 
         @Override
         protected int calcHashCode() {
             int result = 17;
-            /**
-             * TODO calculate hash Code
-             */
-//            result = 31 * result + hardwareType.hashCode();
+            result = 31 * result + operationCode.hashCode();
+            result = 31 * result + hardwareType.hashCode();
+            result = 31 * result + hardwareAddressLength;
+            result = 31 * result + hops.hashCode();
+            result = 31 * result + transactionIdentifier;
+            result = 31 * result + seconds.hashCode();
+            result = 31 * result + flags.hashCode();
+            result = 31 * result + ciaddr.hashCode();
+            result = 31 * result + yiaddr.hashCode();
+            result = 31 * result + siaddr.hashCode();
+            result = 31 * result + giaddr.hashCode();
+            result = 31 * result + chaddr.hashCode();
+            result = 31 * result + sname.hashCode();
+            result = 31 * result + file.hashCode();
+            result = 31 * result + options.hashCode();
             return result;
         }
 

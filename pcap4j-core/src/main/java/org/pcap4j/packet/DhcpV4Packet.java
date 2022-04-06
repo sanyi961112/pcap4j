@@ -87,7 +87,7 @@ public final class DhcpV4Packet extends AbstractPacket {
 
     public static final class Builder extends AbstractBuilder {
 
-        private byte operationCode;
+        private DhcpV4Operation operationCode;
         private ArpHardwareType hardwareType;
         private byte hardwareAddressLength;
         private Number hops;
@@ -108,7 +108,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         }
 
         private Builder(DhcpV4Packet packet) {
-            this.operationCode = (byte) packet.header.operationCode;
+            this.operationCode = packet.header.operationCode;
             this.hardwareType = packet.header.hardwareType;
             this.hardwareAddressLength = packet.header.hardwareAddressLength;
             this.hops = packet.header.hops;
@@ -125,7 +125,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.options = (byte) packet.header.options;
         }
 
-        public Builder operationCode(DhcpV4Operation operation) {
+        public Builder operationCode(DhcpV4Operation operationCode) {
             this.operationCode = operationCode;
             return this;
         }
@@ -207,7 +207,7 @@ public final class DhcpV4Packet extends AbstractPacket {
      */
     public static final class DhcpV4Header extends AbstractHeader {
 
-        /**
+        /** Structure of the Dynamic Host Configuration Protocol
          * DHCPv4 MESSAGE FORMAT
          * Operation Code (1 byte)
          * HARDWARE TYPE (1 byte)
@@ -227,7 +227,7 @@ public final class DhcpV4Packet extends AbstractPacket {
          * OPTIONS (variable size) (Array?)
          */
         /**
-         * Hardware Type comes from the ARP protocol's hardware types
+         * Hardware Type comes from the ARP protocol's hardware types!
          */
         private static final int OPERATION_CODE_OFFSET = 0;
         private static final int OPERATION_CODE_SIZE = BYTE_SIZE_IN_BYTES;
@@ -261,7 +261,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private static final int OPTIONS_SIZE = BYTE_SIZE_IN_BYTES;
         private static final int DHCP_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
-        private final Number operationCode;
+        private final DhcpV4Operation operationCode;
         private final ArpHardwareType hardwareType;
         private final byte hardwareAddressLength;
         private final Number hops;
@@ -291,11 +291,9 @@ public final class DhcpV4Packet extends AbstractPacket {
                 throw new IllegalRawDataException(sb.toString());
             }
 
-            this.operationCode = ByteArrays.getShort(rawData, OPERATION_CODE_OFFSET + offset);
-            this.hardwareType = ByteArrays.getByte(rawData, HARDWARE_TYPE_OFFSET + offset);
-            this.hardwareAddressLength = ByteArrays.getByte(
-                    rawData, HW_ADDRESS_LENGTH_OFFSET + offset
-            );
+            this.operationCode = DhcpV4Operation.getInstance(ByteArrays.getShort(rawData, OPERATION_CODE_OFFSET + offset));
+            this.hardwareType = ArpHardwareType.getInstance(ByteArrays.getShort(rawData, HARDWARE_TYPE_OFFSET + offset));
+            this.hardwareAddressLength = ByteArrays.getByte( rawData, HW_ADDRESS_LENGTH_OFFSET + offset);
             this.hops = ByteArrays.getShort(rawData, HOPS_OFFSET + offset);
             this.transactionIdentifier = ByteArrays.getByte(rawData, TRANSACTION_IDENTIFIER_OFFSET + offset);
             this.seconds = ByteArrays.getShort(rawData, SECONDS_OFFSET + offset);
@@ -331,8 +329,8 @@ public final class DhcpV4Packet extends AbstractPacket {
         }
 
         /*Getters*/
-        public byte getOperationCode() { return (byte) operationCode; }
-        public byte getHardwareType() { return hardwareType; }
+        public DhcpV4Operation getOperationCode() { return operationCode; }
+        public ArpHardwareType getHardwareType() { return hardwareType; }
         public byte getHardwareAddressLength() { return hardwareAddressLength; }
         public byte getHops() { return (byte) hops; }
         public byte getTransactionIdentifier() { return (byte) transactionIdentifier; }
@@ -350,8 +348,8 @@ public final class DhcpV4Packet extends AbstractPacket {
         @Override
         protected List<byte[]> getRawFields() {
             List<byte[]> rawFields = new ArrayList<byte[]>();
-            rawFields.add(ByteArrays.toByteArray(operationCode.intValue()));
-            rawFields.add(ByteArrays.toByteArray(hardwareType));
+            rawFields.add(ByteArrays.toByteArray(operationCode.value()));
+            rawFields.add(ByteArrays.toByteArray(hardwareType.value()));
             rawFields.add(ByteArrays.toByteArray(hardwareAddressLength));
             rawFields.add(ByteArrays.toByteArray(hops.byteValue()));
             rawFields.add(ByteArrays.toByteArray(transactionIdentifier));
@@ -425,6 +423,9 @@ public final class DhcpV4Packet extends AbstractPacket {
                     && options == (other.options);
             /**
              * TODO equals function: fix types of these header values on creation
+             * TODO fix calchashcode for options
+             * TODO fix options variable length (maybe all options should be added in a separate class)
+             *
              */
         }
 
@@ -437,15 +438,15 @@ public final class DhcpV4Packet extends AbstractPacket {
             result = 31 * result + hops.hashCode();
             result = 31 * result + transactionIdentifier;
             result = 31 * result + seconds.hashCode();
-            result = 31 * result + flags.hashCode();
+            result = 31 * result + flags;
             result = 31 * result + ciaddr.hashCode();
             result = 31 * result + yiaddr.hashCode();
             result = 31 * result + siaddr.hashCode();
             result = 31 * result + giaddr.hashCode();
             result = 31 * result + chaddr.hashCode();
-            result = 31 * result + sname.hashCode();
-            result = 31 * result + file.hashCode();
-            result = 31 * result + options.hashCode();
+            result = 31 * result + sname;
+            result = 31 * result + file;
+            result = 31 * result + options;
             return result;
         }
 

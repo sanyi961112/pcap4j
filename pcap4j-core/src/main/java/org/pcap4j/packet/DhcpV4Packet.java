@@ -2,6 +2,8 @@ package org.pcap4j.packet;
 
 import static org.pcap4j.util.ByteArrays.*;
 
+import org.pcap4j.packet.namednumber.ArpHardwareType;
+import org.pcap4j.packet.namednumber.DhcpV4Operation;
 import org.pcap4j.util.ByteArrays;
 import org.pcap4j.util.MacAddress;
 
@@ -86,7 +88,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     public static final class Builder extends AbstractBuilder {
 
         private byte operationCode;
-        private byte hardwareType;
+        private ArpHardwareType hardwareType;
         private byte hardwareAddressLength;
         private Number hops;
         private byte transactionIdentifier;
@@ -111,6 +113,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.hardwareAddressLength = packet.header.hardwareAddressLength;
             this.hops = packet.header.hops;
             this.transactionIdentifier = packet.header.transactionIdentifier;
+            this.seconds = packet.header.seconds;
             this.flags = packet.header.flags;
             this.ciaddr = packet.header.ciaddr;
             this.yiaddr = packet.header.yiaddr;
@@ -122,12 +125,12 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.options = (byte) packet.header.options;
         }
 
-        public Builder operationCode(byte operation) {
+        public Builder operationCode(DhcpV4Operation operation) {
             this.operationCode = operationCode;
             return this;
         }
 
-        public Builder hardwareType(byte hardwareType) {
+        public Builder hardwareType(ArpHardwareType hardwareType) {
             this.hardwareType = hardwareType;
             return this;
         }
@@ -203,9 +206,7 @@ public final class DhcpV4Packet extends AbstractPacket {
      * DhcpV4Header
      */
     public static final class DhcpV4Header extends AbstractHeader {
-        private static final long serialVersionUID = -6744946102881067232L;
 
-        /*(D)iscover, (R)equest, (O)ffer and (A)cknowledge*/
         /**
          * DHCPv4 MESSAGE FORMAT
          * Operation Code (1 byte)
@@ -226,7 +227,7 @@ public final class DhcpV4Packet extends AbstractPacket {
          * OPTIONS (variable size) (Array?)
          */
         /**
-         * TODO fix byte sizes and get something for the options size
+         * Hardware Type comes from the ARP protocol's hardware types
          */
         private static final int OPERATION_CODE_OFFSET = 0;
         private static final int OPERATION_CODE_SIZE = BYTE_SIZE_IN_BYTES;
@@ -261,7 +262,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private static final int DHCP_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
         private final Number operationCode;
-        private final byte hardwareType;
+        private final ArpHardwareType hardwareType;
         private final byte hardwareAddressLength;
         private final Number hops;
         private final byte transactionIdentifier;

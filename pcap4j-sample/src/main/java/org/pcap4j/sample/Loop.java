@@ -59,12 +59,13 @@ public class Loop {
     PacketListener listener = new PacketListener() {
           @Override
           public void gotPacket(Packet packet) {
+            System.out.println("a packet found");
             if (packet.contains(ArpPacket.class)) {
               System.out.println("Arp packet found");
               System.out.println(packet);
             }
-            if (packet.contains(RarpPacket.class)) {
-              System.out.println("Reverse Arp packet found");
+            if (packet.contains(DhcpV4Packet.class)) {
+              System.out.println("DHCPV4 packet packet found");
               System.out.println(packet);
             }
 //            if (packet.contains(UdpPacket.class)){

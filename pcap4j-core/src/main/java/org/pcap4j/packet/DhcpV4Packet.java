@@ -28,8 +28,8 @@ public final class DhcpV4Packet extends AbstractPacket {
 
     private DhcpV4Packet(Builder builder) {
         if (builder == null
-//                || builder.operationCode == null
-//                || builder.hardwareType == null
+                || builder.operationCode == null
+                || builder.hardwareType == null
                 || builder.hops == null
 //                || builder.transactionIdentifier == null
                 || builder.seconds == null
@@ -40,7 +40,8 @@ public final class DhcpV4Packet extends AbstractPacket {
                 || builder.chaddr == null
 //                || builder.sname == null
 //                || builder.file == null
-            /*  || builder.options == null*/) {
+//                || builder.options == null
+                ) {
             StringBuilder sb = new StringBuilder();
             sb.append("builder :")
                     .append(builder)
@@ -203,7 +204,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     }
 
     /**
-     * DhcpV4Header
+     * Dhcp Header
      */
     public static final class DhcpV4Header extends AbstractHeader {
 
@@ -222,12 +223,16 @@ public final class DhcpV4Packet extends AbstractPacket {
          * SERVER IP address (siaddr) (4 bytes)
          * GATEWAY IP address (giaddr) (4 bytes)
          * CLIENT HARDWARE address (chaddr) (16 bytes)
+         * padding?
          * SERVER NAME (sname) (64 bytes)
          * FILE (~Boot File Name) (128 bytes)
+         * MAGIC COOKIE (4 bytes) <- this shows that this is a dhcp packet and not BOOTP packet
          * OPTIONS (variable size) (Array?)
+         * padding?
          */
         /**
-         * Hardware Type comes from the ARP protocol's hardware types!
+         * Hardware Type comes from the ARP hardware types
+         * Ports used: 67,68
          */
         private static final int OPERATION_CODE_OFFSET = 0;
         private static final int OPERATION_CODE_SIZE = BYTE_SIZE_IN_BYTES;
@@ -238,27 +243,27 @@ public final class DhcpV4Packet extends AbstractPacket {
         private static final int HOPS_OFFSET = HW_ADDRESS_LENGTH_OFFSET + HW_ADDRESS_LENGTH_SIZE;
         private static final int HOPS_SIZE = BYTE_SIZE_IN_BYTES;
         private static final int TRANSACTION_IDENTIFIER_OFFSET = HOPS_OFFSET + HOPS_SIZE;
-        private static final int TRANSACTION_IDENTIFIER_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int TRANSACTION_IDENTIFIER_SIZE = INT_SIZE_IN_BYTES;
         private static final int SECONDS_OFFSET = TRANSACTION_IDENTIFIER_OFFSET + TRANSACTION_IDENTIFIER_SIZE;
-        private static final int SECONDS_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int SECONDS_SIZE = SHORT_SIZE_IN_BYTES;
         private static final int FLAGS_OFFSET = SECONDS_OFFSET + SECONDS_SIZE;
-        private static final int FLAGS_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int FLAGS_SIZE = SHORT_SIZE_IN_BYTES;
         private static final int CIADDR_OFFSET = FLAGS_OFFSET + FLAGS_SIZE;
-        private static final int CIADDR_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int CIADDR_SIZE = INET4_ADDRESS_SIZE_IN_BYTES;
         private static final int YIADDR_OFFSET = CIADDR_OFFSET + CIADDR_SIZE;
-        private static final int YIADDR_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int YIADDR_SIZE = INET4_ADDRESS_SIZE_IN_BYTES;
         private static final int SIADDR_OFFSET = YIADDR_OFFSET + YIADDR_SIZE;
-        private static final int SIADDR_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int SIADDR_SIZE = INET4_ADDRESS_SIZE_IN_BYTES;
         private static final int GIADDR_OFFSET = SIADDR_OFFSET + SIADDR_SIZE;
-        private static final int GIADDR_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int GIADDR_SIZE = INET4_ADDRESS_SIZE_IN_BYTES;
         private static final int CHADDR_OFFSET = GIADDR_OFFSET + GIADDR_SIZE;
-        private static final int CHADDR_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int CHADDR_SIZE = MacAddress.SIZE_IN_BYTES;
         private static final int SNAME_OFFSET = CHADDR_OFFSET + CHADDR_SIZE;
         private static final int SNAME_SIZE = BYTE_SIZE_IN_BYTES;
         private static final int FILE_OFFSET = SNAME_OFFSET + SNAME_SIZE;
         private static final int FILE_SIZE = BYTE_SIZE_IN_BYTES;
         private static final int OPTIONS_OFFSET = FILE_OFFSET + FILE_SIZE;
-        private static final int OPTIONS_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int OPTIONS_SIZE = LONG_SIZE_IN_BYTES;
         private static final int DHCP_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
         private final DhcpV4Operation operationCode;
@@ -278,18 +283,18 @@ public final class DhcpV4Packet extends AbstractPacket {
         private final short options;
 
         private DhcpV4Header(byte[] rawData, int offset, int length) throws IllegalRawDataException {
-            if (length < DHCP_HEADER_SIZE) {
-                StringBuilder sb = new StringBuilder(200);
-                sb.append("The data is too short to build a DHCP header")
-                        .append(DHCP_HEADER_SIZE)
-                        .append(" bytes). data: ")
-                        .append(ByteArrays.toHexString(rawData, " "))
-                        .append(", offset: ")
-                        .append(offset)
-                        .append(", length: ")
-                        .append(length);
-                throw new IllegalRawDataException(sb.toString());
-            }
+//            if (length < DHCP_HEADER_SIZE) {
+//                StringBuilder sb = new StringBuilder(200);
+//                sb.append("The data is too short to build a DHCP header")
+//                        .append(DHCP_HEADER_SIZE)
+//                        .append(" bytes). data: ")
+//                        .append(ByteArrays.toHexString(rawData, " "))
+//                        .append(", offset: ")
+//                        .append(offset)
+//                        .append(", length: ")
+//                        .append(length);
+//                throw new IllegalRawDataException(sb.toString());
+//            }
 
             this.operationCode = DhcpV4Operation.getInstance(ByteArrays.getShort(rawData, OPERATION_CODE_OFFSET + offset));
             this.hardwareType = ArpHardwareType.getInstance(ByteArrays.getShort(rawData, HARDWARE_TYPE_OFFSET + offset));
@@ -333,9 +338,9 @@ public final class DhcpV4Packet extends AbstractPacket {
         public ArpHardwareType getHardwareType() { return hardwareType; }
         public byte getHardwareAddressLength() { return hardwareAddressLength; }
         public byte getHops() { return (byte) hops; }
-        public byte getTransactionIdentifier() { return (byte) transactionIdentifier; }
+        public byte getTransactionIdentifier() { return transactionIdentifier; }
         public byte getSeconds() { return (byte) seconds; }
-        public byte getFlags() { return (byte) flags; }
+        public byte getFlags() { return flags; }
         public InetAddress getCiaddr() { return ciaddr; }
         public InetAddress getYiaddr() { return yiaddr; }
         public InetAddress getSiaddr() { return siaddr; }
@@ -347,7 +352,7 @@ public final class DhcpV4Packet extends AbstractPacket {
 
         @Override
         protected List<byte[]> getRawFields() {
-            List<byte[]> rawFields = new ArrayList<byte[]>();
+            List<byte[]> rawFields = new ArrayList<>();
             rawFields.add(ByteArrays.toByteArray(operationCode.value()));
             rawFields.add(ByteArrays.toByteArray(hardwareType.value()));
             rawFields.add(ByteArrays.toByteArray(hardwareAddressLength));
@@ -376,7 +381,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             StringBuilder sb = new StringBuilder();
             String ls = System.getProperty("line.separator");
 
-            sb.append("[DHCPv4 Header (").append(length()).append(" bytes)]").append(ls);
+            sb.append("[DHCP Header (").append(length()).append(" bytes)]").append(ls);
             sb.append("  Operation Code: ").append(operationCode).append(ls);
             sb.append("  Hardware type: ").append(hardwareType).append(ls);
             sb.append("  Hardware address length: ").append(hardwareAddressLength).append(ls);
@@ -422,10 +427,7 @@ public final class DhcpV4Packet extends AbstractPacket {
                     && file == (other.file)
                     && options == (other.options);
             /**
-             * TODO equals function: fix types of these header values on creation
-             * TODO fix calchashcode for options
-             * TODO fix options variable length (maybe all options should be added in a separate class)
-             *
+             * TODO fix options variable length (maybe all options should be added in a separate class) or keep it in hexcode
              */
         }
 

@@ -2,7 +2,7 @@ package org.pcap4j.packet;
 
 import static org.pcap4j.util.ByteArrays.*;
 
-import org.pcap4j.packet.namednumber.ArpHardwareType;
+import org.pcap4j.packet.namednumber.DhcpV4HardwareType;
 import org.pcap4j.packet.namednumber.DhcpV4Operation;
 import org.pcap4j.util.ByteArrays;
 import org.pcap4j.util.MacAddress;
@@ -87,7 +87,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     public static final class Builder extends AbstractBuilder {
 
         private DhcpV4Operation operationCode;
-        private ArpHardwareType hardwareType;
+        private DhcpV4HardwareType hardwareType;
         private byte hardwareAddressLength;
         private byte hops;
         private int transactionIdentifier;
@@ -132,7 +132,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             return this;
         }
 
-        public Builder hardwareType(ArpHardwareType hardwareType) {
+        public Builder hardwareType(DhcpV4HardwareType hardwareType) {
             this.hardwareType = hardwareType;
             return this;
         }
@@ -273,7 +273,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private static final int DHCP_MIN_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
         private final DhcpV4Operation operationCode;
-        private final ArpHardwareType hardwareType;
+        private final DhcpV4HardwareType hardwareType;
         private final byte hardwareAddressLength;
         private final byte hops;
         private final int transactionIdentifier;
@@ -305,7 +305,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             }
 
             this.operationCode = DhcpV4Operation.getInstance(ByteArrays.getByte(rawData, OPERATION_CODE_OFFSET + offset));
-            this.hardwareType = ArpHardwareType.getInstance(ByteArrays.getShort(rawData, HARDWARE_TYPE_OFFSET + offset));
+            this.hardwareType = DhcpV4HardwareType.getInstance(ByteArrays.getByte(rawData, HARDWARE_TYPE_OFFSET + offset));
             this.hardwareAddressLength = ByteArrays.getByte(rawData, HW_ADDRESS_LENGTH_OFFSET + offset);
             this.hops = ByteArrays.getByte(rawData, HOPS_OFFSET + offset);
             this.transactionIdentifier = ByteArrays.getByte(rawData, TRANSACTION_IDENTIFIER_OFFSET + offset);
@@ -348,7 +348,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             return operationCode;
         }
 
-        public ArpHardwareType getHardwareType() {
+        public DhcpV4HardwareType getHardwareType() {
             return hardwareType;
         }
 
@@ -437,19 +437,19 @@ public final class DhcpV4Packet extends AbstractPacket {
             String ls = System.getProperty("line.separator");
 
             sb.append("[DHCP Header (").append(length()).append(" bytes)]").append(ls);
-            sb.append("  Operation Code: ").append(getOperationCode()).append(ls);
+            sb.append("  Operation code: ").append(getOperationCode()).append(ls);
             sb.append("  Hardware type: ").append(hardwareType).append(ls);
             sb.append("  Hardware address length: ").append(hardwareAddressLength).append(ls);
             sb.append("  Hops: ").append(hops).append(ls);
             sb.append("  Transaction ID: 0x").append(ByteArrays.toHexString(transactionIdentifier, "")).append(ls);
             sb.append("  Seconds elapsed: ").append(seconds).append(ls);
             sb.append("  Flags: ").append(flags).append(ls);
-            sb.append("  CLIENT IP address: ").append(ciaddr).append(ls);
+            sb.append("  Client IP address: ").append(ciaddr).append(ls);
             sb.append("  Your IP address: ").append(yiaddr).append(ls);
-            sb.append("  SERVER IP address: ").append(siaddr).append(ls);
-            sb.append("  GATEWAY IP address: ").append(giaddr).append(ls);
-            sb.append("  CLIENT HARDWARE address: ").append(chaddr).append(ls);
-            sb.append("  CLIENT HARDWARE address padding: ").append(chaddrPadding).append(ls);
+            sb.append("  Server IP address: ").append(siaddr).append(ls);
+            sb.append("  Gateway IP address: ").append(giaddr).append(ls);
+            sb.append("  Client hardware address: ").append(chaddr).append(ls);
+            sb.append("  Client hardware address padding: ").append(chaddrPadding).append(ls);
             sb.append("  Server name: ").append(sname).append(ls);
             sb.append("  BOOT file: ").append(file).append(ls);
             sb.append("  Magic cookie: ").append(cookie).append(ls);

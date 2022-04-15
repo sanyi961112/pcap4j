@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DhcpV4Operation extends NamedNumber<Short, DhcpV4Operation> {
-    public static final DhcpV4Operation REQUEST = new DhcpV4Operation((short) 1, "Request");
-    public static final DhcpV4Operation REPLY = new DhcpV4Operation((short) 1, "Reply");
+    public static final DhcpV4Operation REQUEST = new DhcpV4Operation((short) 1, "Boot Request");
+    public static final DhcpV4Operation REPLY = new DhcpV4Operation((short) 2, "Boot Reply");
 
     private static final Map<Short, DhcpV4Operation> registry = new HashMap<Short, DhcpV4Operation>(30);
 

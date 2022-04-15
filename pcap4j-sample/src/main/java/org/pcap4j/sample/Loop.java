@@ -65,13 +65,14 @@ public class Loop {
 //              System.out.println(packet);
 //            }
             if (packet.contains(DhcpV4Packet.class)) {
-              System.out.println("DHCPV4 packet packet found");
+              System.out.println("DHCP packet found");
               System.out.println(packet);
+              System.out.println();
             }
-            if (packet.contains(UdpPacket.class)){
-              System.out.println("Udp packet found");
+//            if (packet.contains(UdpPacket.class)){
+//              System.out.println("Udp packet found");
 //              System.out.println(packet);
-            }
+//            }
 //            if (packet.contains(IcmpV4CommonPacket.class)) {
 //              System.out.println("icmpv4 packet found");
 //              System.out.println(packet);

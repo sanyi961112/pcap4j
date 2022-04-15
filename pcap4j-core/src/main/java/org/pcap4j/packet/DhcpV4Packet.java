@@ -17,7 +17,8 @@ public final class DhcpV4Packet extends AbstractPacket {
 
     private final DhcpV4Header header;
 
-    public static DhcpV4Packet newPacket(byte[] rawData, int offset, int length) throws IllegalRawDataException {
+    public static DhcpV4Packet newPacket(byte[] rawData, int offset, int length)
+            throws IllegalRawDataException {
         ByteArrays.validateBounds(rawData, offset, length);
         return new DhcpV4Packet(rawData, offset, length);
     }
@@ -30,8 +31,6 @@ public final class DhcpV4Packet extends AbstractPacket {
         if (builder == null
                 || builder.operationCode == null
                 || builder.hardwareType == null
-                || builder.hops == null
-                || builder.seconds == null
                 || builder.ciaddr == null
                 || builder.yiaddr == null
                 || builder.giaddr == null
@@ -90,10 +89,10 @@ public final class DhcpV4Packet extends AbstractPacket {
         private DhcpV4Operation operationCode;
         private ArpHardwareType hardwareType;
         private byte hardwareAddressLength;
-        private Number hops;
-        private short transactionIdentifier;
-        private Number seconds;
-        private byte flags;
+        private byte hops;
+        private int transactionIdentifier;
+        private short seconds;
+        private short flags;
         private InetAddress ciaddr;
         private InetAddress yiaddr;
         private InetAddress siaddr;
@@ -102,7 +101,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private byte chaddrPadding;
         private byte sname;
         private byte file;
-        private byte cookie;
+        private short cookie;
         private byte options;
 
 
@@ -148,7 +147,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             return this;
         }
 
-        public Builder transactionIdentifier(byte transactionIdentifier) {
+        public Builder transactionIdentifier(int transactionIdentifier) {
             this.transactionIdentifier = transactionIdentifier;
             return this;
         }
@@ -215,7 +214,6 @@ public final class DhcpV4Packet extends AbstractPacket {
     public static final class DhcpV4Header extends AbstractHeader {
 
         /** Structure of the Dynamic Host Configuration Protocol
-         * DHCP MESSAGE FORMAT
          * Operation Code (1 byte)
          * HARDWARE TYPE (1 byte)
          * HARDWARE ADDRESS LENGTH (1 byte)
@@ -228,16 +226,15 @@ public final class DhcpV4Packet extends AbstractPacket {
          * SERVER IP address (siaddr) (4 bytes)
          * GATEWAY IP address (giaddr) (4 bytes)
          * CLIENT HARDWARE address (chaddr) (16 bytes)
-         * Client HARDWARE address padding 10 bytes fixed
+         * CLIENT HARDWARE address padding 10 bytes fixed
          * SERVER NAME (sname) (64 bytes)
          * FILE (~Boot File Name) (128 bytes fixed)
          * MAGIC COOKIE (4 bytes) <- this shows that this is a DHCP packet and not BOOTP packet
-         * OPTIONS (variable size) (Array?)
+         * OPTIONS (variable size)
          * padding? (everything after boot option 255/ff)
          */
         /**
          * Hardware Type comes from the ARP hardware types
-         * Ports used: 67,68
          */
         private static final int OPERATION_CODE_OFFSET = 0;
         private static final int OPERATION_CODE_SIZE = BYTE_SIZE_IN_BYTES;
@@ -262,7 +259,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private static final int GIADDR_OFFSET = SIADDR_OFFSET + SIADDR_SIZE;
         private static final int GIADDR_SIZE = INET4_ADDRESS_SIZE_IN_BYTES;
         private static final int CHADDR_OFFSET = GIADDR_OFFSET + GIADDR_SIZE;
-        private static final int CHADDR_SIZE = MacAddress.SIZE_IN_BYTES;
+        private static final int CHADDR_SIZE = 16;
         private static final int CHADDRPADDING_OFFSET = CHADDR_OFFSET + CHADDR_SIZE;
         private static final int CHADDRPADDING_SIZE = 10;
         private static final int SNAME_OFFSET = CHADDRPADDING_OFFSET + CHADDRPADDING_SIZE;
@@ -278,10 +275,10 @@ public final class DhcpV4Packet extends AbstractPacket {
         private final DhcpV4Operation operationCode;
         private final ArpHardwareType hardwareType;
         private final byte hardwareAddressLength;
-        private final Number hops;
-        private final short transactionIdentifier;
-        private final Number seconds;
-        private final byte flags;
+        private final byte hops;
+        private final int transactionIdentifier;
+        private final short seconds;
+        private final short flags;
         private final InetAddress ciaddr;
         private final InetAddress yiaddr;
         private final InetAddress siaddr;
@@ -290,7 +287,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private final byte chaddrPadding;
         private final byte sname;
         private final byte file;
-        private final byte cookie;
+        private final short cookie;
         private final byte options;
 
         private DhcpV4Header(byte[] rawData, int offset, int length) throws IllegalRawDataException {
@@ -307,13 +304,13 @@ public final class DhcpV4Packet extends AbstractPacket {
                 throw new IllegalRawDataException(sb.toString());
             }
 
-            this.operationCode = DhcpV4Operation.getInstance(ByteArrays.getShort(rawData, OPERATION_CODE_OFFSET + offset));
+            this.operationCode = DhcpV4Operation.getInstance(ByteArrays.getByte(rawData, OPERATION_CODE_OFFSET + offset));
             this.hardwareType = ArpHardwareType.getInstance(ByteArrays.getShort(rawData, HARDWARE_TYPE_OFFSET + offset));
             this.hardwareAddressLength = ByteArrays.getByte(rawData, HW_ADDRESS_LENGTH_OFFSET + offset);
-            this.hops = ByteArrays.getShort(rawData, HOPS_OFFSET + offset);
-            this.transactionIdentifier = ByteArrays.getShort(rawData, TRANSACTION_IDENTIFIER_OFFSET + offset);
+            this.hops = ByteArrays.getByte(rawData, HOPS_OFFSET + offset);
+            this.transactionIdentifier = ByteArrays.getByte(rawData, TRANSACTION_IDENTIFIER_OFFSET + offset);
             this.seconds = ByteArrays.getShort(rawData, SECONDS_OFFSET + offset);
-            this.flags = ByteArrays.getByte(rawData, FLAGS_OFFSET + offset);
+            this.flags = ByteArrays.getShort(rawData, FLAGS_OFFSET + offset);
             this.ciaddr = ByteArrays.getInet4Address(rawData, CIADDR_OFFSET + offset);
             this.yiaddr = ByteArrays.getInet4Address(rawData, YIADDR_OFFSET + offset);
             this.siaddr = ByteArrays.getInet4Address(rawData, SIADDR_OFFSET + offset);
@@ -360,16 +357,16 @@ public final class DhcpV4Packet extends AbstractPacket {
         }
 
         public byte getHops() {
-            return (byte) hops;
+            return hops;
         }
 
-        public short getTransactionIdentifier() { return transactionIdentifier; }
+        public int getTransactionIdentifier() { return transactionIdentifier; }
 
         public byte getSeconds() {
             return (byte) seconds;
         }
 
-        public byte getFlags() {
+        public short getFlags() {
             return flags;
         }
 
@@ -402,7 +399,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         public byte getFile() {
             return file;
         }
-        public byte getCookie() { return cookie; }
+        public short getCookie() { return cookie; }
 
         public byte getOptions() { return options; }
 
@@ -412,9 +409,9 @@ public final class DhcpV4Packet extends AbstractPacket {
             rawFields.add(ByteArrays.toByteArray(operationCode.value()));
             rawFields.add(ByteArrays.toByteArray(hardwareType.value()));
             rawFields.add(ByteArrays.toByteArray(hardwareAddressLength));
-            rawFields.add(ByteArrays.toByteArray(hops.byteValue()));
+            rawFields.add(ByteArrays.toByteArray(hops));
             rawFields.add(ByteArrays.toByteArray(transactionIdentifier));
-            rawFields.add(ByteArrays.toByteArray(seconds.intValue()));
+            rawFields.add(ByteArrays.toByteArray(seconds));
             rawFields.add(ByteArrays.toByteArray(flags));
             rawFields.add(ByteArrays.toByteArray(ciaddr));
             rawFields.add(ByteArrays.toByteArray(yiaddr));
@@ -440,11 +437,11 @@ public final class DhcpV4Packet extends AbstractPacket {
             String ls = System.getProperty("line.separator");
 
             sb.append("[DHCP Header (").append(length()).append(" bytes)]").append(ls);
-            sb.append("  Operation Code: ").append(operationCode).append(ls);
+            sb.append("  Operation Code: ").append(getOperationCode()).append(ls);
             sb.append("  Hardware type: ").append(hardwareType).append(ls);
             sb.append("  Hardware address length: ").append(hardwareAddressLength).append(ls);
             sb.append("  Hops: ").append(hops).append(ls);
-            sb.append("  TransactionIdentifier: 0x").append(ByteArrays.toHexString(transactionIdentifier, "")).append(ls);
+            sb.append("  Transaction ID: 0x").append(ByteArrays.toHexString(transactionIdentifier, "")).append(ls);
             sb.append("  Seconds elapsed: ").append(seconds).append(ls);
             sb.append("  Flags: ").append(flags).append(ls);
             sb.append("  CLIENT IP address: ").append(ciaddr).append(ls);
@@ -474,9 +471,9 @@ public final class DhcpV4Packet extends AbstractPacket {
             return operationCode.equals(other.getOperationCode())
                     && hardwareType == (other.hardwareType)
                     && hardwareAddressLength == (other.hardwareAddressLength)
-                    && hops.equals(other.hops)
+                    && hops == (other.hops)
                     && transactionIdentifier == (other.transactionIdentifier)
-                    && seconds.equals(other.seconds)
+                    && seconds == (other.seconds)
                     && flags == (other.flags)
                     && ciaddr.equals(other.ciaddr)
                     && yiaddr.equals(other.yiaddr)
@@ -496,9 +493,9 @@ public final class DhcpV4Packet extends AbstractPacket {
             result = 31 * result + operationCode.hashCode();
             result = 31 * result + hardwareType.hashCode();
             result = 31 * result + hardwareAddressLength;
-            result = 31 * result + hops.hashCode();
+            result = 31 * result + hops;
             result = 31 * result + transactionIdentifier;
-            result = 31 * result + seconds.hashCode();
+            result = 31 * result + seconds;
             result = 31 * result + flags;
             result = 31 * result + ciaddr.hashCode();
             result = 31 * result + yiaddr.hashCode();

@@ -3,22 +3,27 @@ package org.pcap4j.packet.namednumber;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DhcpV4Operation extends NamedNumber<Short, DhcpV4Operation> {
-    public static final DhcpV4Operation REQUEST = new DhcpV4Operation((short) 1, "Boot Request");
-    public static final DhcpV4Operation REPLY = new DhcpV4Operation((short) 2, "Boot Reply");
+public class DhcpV4Operation extends NamedNumber<Byte, DhcpV4Operation> {
 
-    private static final Map<Short, DhcpV4Operation> registry = new HashMap<Short, DhcpV4Operation>(30);
+    private static final long serialVersionUID = 5430000000000000163L;
+
+    /** REQUEST: 1 */
+    public static final DhcpV4Operation REQUEST = new DhcpV4Operation((byte) 1, "Boot Request");
+    /** REPLY: 2 */
+    public static final DhcpV4Operation REPLY = new DhcpV4Operation((byte) 2, "Boot Reply");
+
+    private static final Map<Byte, DhcpV4Operation> registry = new HashMap<Byte, DhcpV4Operation>(30);
 
     static{
         registry.put(REQUEST.value(), REQUEST);
         registry.put(REPLY.value(), REPLY);
     }
 
-    public DhcpV4Operation(Short value, String name) {
+    public DhcpV4Operation(Byte value, String name) {
         super(value, name);
     }
 
-    public static DhcpV4Operation getInstance(Short value) {
+    public static DhcpV4Operation getInstance(Byte value) {
         if (registry.containsKey(value)) {
             return registry.get(value);
         } else {

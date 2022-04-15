@@ -13,9 +13,9 @@ import java.util.List;
 
 public final class DhcpV4Packet extends AbstractPacket {
 
+    private static final long serialVersionUID = 2600000000000000063L;
 
     private final DhcpV4Header header;
-
 
     public static DhcpV4Packet newPacket(byte[] rawData, int offset, int length) throws IllegalRawDataException {
         ByteArrays.validateBounds(rawData, offset, length);
@@ -31,17 +31,12 @@ public final class DhcpV4Packet extends AbstractPacket {
                 || builder.operationCode == null
                 || builder.hardwareType == null
                 || builder.hops == null
-//                || builder.transactionIdentifier == null
                 || builder.seconds == null
-//                || builder.flags == null
                 || builder.ciaddr == null
                 || builder.yiaddr == null
                 || builder.giaddr == null
                 || builder.chaddr == null
-//                || builder.sname == null
-//                || builder.file == null
-//                || builder.options == null
-                ) {
+        ) {
             StringBuilder sb = new StringBuilder();
             sb.append("builder :")
                     .append(builder)
@@ -69,6 +64,8 @@ public final class DhcpV4Packet extends AbstractPacket {
                     .append(builder.sname)
                     .append(" builder.file: ")
                     .append(builder.file)
+                    .append(" builder.cookie: ")
+                    .append(builder.cookie)
                     .append(" builder.options: ")
                     .append(builder.options);
             throw new NullPointerException(sb.toString());
@@ -102,6 +99,7 @@ public final class DhcpV4Packet extends AbstractPacket {
         private MacAddress chaddr;
         private byte sname;
         private byte file;
+        private byte cookie;
         private byte options;
 
 
@@ -123,6 +121,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.chaddr = packet.header.chaddr;
             this.sname = packet.header.sname;
             this.file = packet.header.file;
+            this.cookie = packet.header.cookie;
             this.options = (byte) packet.header.options;
         }
 
@@ -190,6 +189,10 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.file = file;
             return this;
         }
+        public Builder cookie(byte cookie) {
+            this.cookie = cookie;
+            return this;
+        }
 
         public Builder options(byte options) {
             this.options = options;
@@ -209,8 +212,8 @@ public final class DhcpV4Packet extends AbstractPacket {
     public static final class DhcpV4Header extends AbstractHeader {
 
         /** Structure of the Dynamic Host Configuration Protocol
-         * DHCPv4 MESSAGE FORMAT
-         * Operation Code (1 byte)
+         * DHCP MESSAGE FORMAT
+         * Operation Code (1 byte) Request or Reply
          * HARDWARE TYPE (1 byte)
          * HARDWARE ADDRESS LENGTH (1 byte)
          * HOPS (1 byte)
@@ -225,8 +228,8 @@ public final class DhcpV4Packet extends AbstractPacket {
          * CLIENT HARDWARE address (chaddr) (16 bytes)
          * padding?
          * SERVER NAME (sname) (64 bytes)
-         * FILE (~Boot File Name) (128 bytes)
-         * MAGIC COOKIE (4 bytes) <- this shows that this is a dhcp packet and not BOOTP packet
+         * FILE (~Boot File Name) (128 bytes fixed)
+         * MAGIC COOKIE (4 bytes) <- this shows that this is a DHCP packet and not BOOTP packet
          * OPTIONS (variable size) (Array?)
          * padding?
          */
@@ -259,12 +262,14 @@ public final class DhcpV4Packet extends AbstractPacket {
         private static final int CHADDR_OFFSET = GIADDR_OFFSET + GIADDR_SIZE;
         private static final int CHADDR_SIZE = MacAddress.SIZE_IN_BYTES;
         private static final int SNAME_OFFSET = CHADDR_OFFSET + CHADDR_SIZE;
-        private static final int SNAME_SIZE = BYTE_SIZE_IN_BYTES;
+        private static final int SNAME_SIZE = 64;
         private static final int FILE_OFFSET = SNAME_OFFSET + SNAME_SIZE;
-        private static final int FILE_SIZE = BYTE_SIZE_IN_BYTES;
-        private static final int OPTIONS_OFFSET = FILE_OFFSET + FILE_SIZE;
-        private static final int OPTIONS_SIZE = LONG_SIZE_IN_BYTES;
-        private static final int DHCP_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
+        private static final int FILE_SIZE = 128;
+        private static final int COOKIE_OFFSET = FILE_OFFSET + FILE_SIZE;
+        private static final int COOKIE_SIZE = INT_SIZE_IN_BYTES;
+        private static final int OPTIONS_OFFSET = COOKIE_OFFSET + COOKIE_SIZE;
+        private static final int OPTIONS_SIZE = INT_SIZE_IN_BYTES;
+        private static final int DHCP_MIN_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
         private final DhcpV4Operation operationCode;
         private final ArpHardwareType hardwareType;
@@ -280,25 +285,26 @@ public final class DhcpV4Packet extends AbstractPacket {
         private final MacAddress chaddr;
         private final byte sname;
         private final byte file;
+        private final byte cookie;
         private final short options;
 
         private DhcpV4Header(byte[] rawData, int offset, int length) throws IllegalRawDataException {
-//            if (length < DHCP_HEADER_SIZE) {
-//                StringBuilder sb = new StringBuilder(200);
-//                sb.append("The data is too short to build a DHCP header")
-//                        .append(DHCP_HEADER_SIZE)
-//                        .append(" bytes). data: ")
-//                        .append(ByteArrays.toHexString(rawData, " "))
-//                        .append(", offset: ")
-//                        .append(offset)
-//                        .append(", length: ")
-//                        .append(length);
-//                throw new IllegalRawDataException(sb.toString());
-//            }
+            if (length < DHCP_MIN_HEADER_SIZE) {
+                StringBuilder sb = new StringBuilder(600);
+                sb.append("The data is too short to build a DHCP header")
+                        .append(DHCP_MIN_HEADER_SIZE)
+                        .append(" bytes). data: ")
+                        .append(ByteArrays.toHexString(rawData, " "))
+                        .append(", offset: ")
+                        .append(offset)
+                        .append(", length: ")
+                        .append(length);
+                throw new IllegalRawDataException(sb.toString());
+            }
 
             this.operationCode = DhcpV4Operation.getInstance(ByteArrays.getShort(rawData, OPERATION_CODE_OFFSET + offset));
             this.hardwareType = ArpHardwareType.getInstance(ByteArrays.getShort(rawData, HARDWARE_TYPE_OFFSET + offset));
-            this.hardwareAddressLength = ByteArrays.getByte( rawData, HW_ADDRESS_LENGTH_OFFSET + offset);
+            this.hardwareAddressLength = ByteArrays.getByte(rawData, HW_ADDRESS_LENGTH_OFFSET + offset);
             this.hops = ByteArrays.getShort(rawData, HOPS_OFFSET + offset);
             this.transactionIdentifier = ByteArrays.getByte(rawData, TRANSACTION_IDENTIFIER_OFFSET + offset);
             this.seconds = ByteArrays.getShort(rawData, SECONDS_OFFSET + offset);
@@ -310,10 +316,9 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.chaddr = ByteArrays.getMacAddress(rawData, CHADDR_OFFSET + offset);
             this.sname = ByteArrays.getByte(rawData, SNAME_OFFSET + offset);
             this.file = ByteArrays.getByte(rawData, FILE_OFFSET + offset);
+            this.cookie = ByteArrays.getByte(rawData, COOKIE_OFFSET + offset);
             this.options = ByteArrays.getShort(rawData, OPTIONS_OFFSET + offset);
-
-
-        }
+       }
 
         private DhcpV4Header(Builder builder) {
             this.operationCode = builder.operationCode;
@@ -330,25 +335,71 @@ public final class DhcpV4Packet extends AbstractPacket {
             this.chaddr = builder.chaddr;
             this.sname = builder.sname;
             this.file = builder.file;
+            this.cookie = builder.cookie;
             this.options = builder.options;
         }
 
         /*Getters*/
-        public DhcpV4Operation getOperationCode() { return operationCode; }
-        public ArpHardwareType getHardwareType() { return hardwareType; }
-        public byte getHardwareAddressLength() { return hardwareAddressLength; }
-        public byte getHops() { return (byte) hops; }
-        public byte getTransactionIdentifier() { return transactionIdentifier; }
-        public byte getSeconds() { return (byte) seconds; }
-        public byte getFlags() { return flags; }
-        public InetAddress getCiaddr() { return ciaddr; }
-        public InetAddress getYiaddr() { return yiaddr; }
-        public InetAddress getSiaddr() { return siaddr; }
-        public InetAddress getGiaddr() { return giaddr; }
-        public MacAddress getChaddr() { return chaddr; }
-        public byte getSname() { return  sname; }
-        public byte getFile() { return file; }
-        public byte getOptions() { return (byte) options; }
+        public DhcpV4Operation getOperationCode() {
+            return operationCode;
+        }
+
+        public ArpHardwareType getHardwareType() {
+            return hardwareType;
+        }
+
+        public byte getHardwareAddressLength() {
+            return hardwareAddressLength;
+        }
+
+        public byte getHops() {
+            return (byte) hops;
+        }
+
+        public byte getTransactionIdentifier() {
+            return transactionIdentifier;
+        }
+
+        public byte getSeconds() {
+            return (byte) seconds;
+        }
+
+        public byte getFlags() {
+            return flags;
+        }
+
+        public InetAddress getCiaddr() {
+            return ciaddr;
+        }
+
+        public InetAddress getYiaddr() {
+            return yiaddr;
+        }
+
+        public InetAddress getSiaddr() {
+            return siaddr;
+        }
+
+        public InetAddress getGiaddr() {
+            return giaddr;
+        }
+
+        public MacAddress getChaddr() {
+            return chaddr;
+        }
+
+        public byte getSname() {
+            return sname;
+        }
+
+        public byte getFile() {
+            return file;
+        }
+        public byte getCookie() { return cookie; }
+
+        public byte getOptions() {
+            return (byte) options;
+        }
 
         @Override
         protected List<byte[]> getRawFields() {
@@ -367,13 +418,14 @@ public final class DhcpV4Packet extends AbstractPacket {
             rawFields.add(ByteArrays.toByteArray(chaddr));
             rawFields.add(ByteArrays.toByteArray(sname));
             rawFields.add(ByteArrays.toByteArray(file));
+            rawFields.add(ByteArrays.toByteArray(cookie));
             rawFields.add(ByteArrays.toByteArray(options));
             return rawFields;
         }
 
         @Override
         public int length() {
-            return DHCP_HEADER_SIZE;
+            return DHCP_MIN_HEADER_SIZE;
         }
 
         @Override
@@ -396,13 +448,14 @@ public final class DhcpV4Packet extends AbstractPacket {
             sb.append("  chaddr: ").append(chaddr).append(ls);
             sb.append("  sname: ").append(sname).append(ls);
             sb.append("  file: ").append(file).append(ls);
+            sb.append("  magic cookie: ").append(cookie).append(ls);
             sb.append("  options: ").append(options).append(ls);
 
             return sb.toString();
         }
 
         @Override
-        public boolean equals(Object obj){
+        public boolean equals(Object obj) {
             if (obj == this) {
                 return true;
             }
@@ -425,10 +478,8 @@ public final class DhcpV4Packet extends AbstractPacket {
                     && chaddr.equals(other.chaddr)
                     && sname == (other.sname)
                     && file == (other.file)
+                    && cookie == (other.cookie)
                     && options == (other.options);
-            /**
-             * TODO fix options variable length (maybe all options should be added in a separate class) or keep it in hexcode
-             */
         }
 
         @Override
@@ -448,6 +499,7 @@ public final class DhcpV4Packet extends AbstractPacket {
             result = 31 * result + chaddr.hashCode();
             result = 31 * result + sname;
             result = 31 * result + file;
+            result = 31 * result + cookie;
             result = 31 * result + options;
             return result;
         }

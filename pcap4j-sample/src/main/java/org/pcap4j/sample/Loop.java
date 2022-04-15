@@ -59,19 +59,19 @@ public class Loop {
     PacketListener listener = new PacketListener() {
           @Override
           public void gotPacket(Packet packet) {
-            System.out.println("a packet found");
-            if (packet.contains(ArpPacket.class)) {
-              System.out.println("Arp packet found");
-              System.out.println(packet);
-            }
+//            System.out.println(packet);
+//            if (packet.contains(ArpPacket.class)) {
+//              System.out.println("Arp packet found");
+//              System.out.println(packet);
+//            }
             if (packet.contains(DhcpV4Packet.class)) {
               System.out.println("DHCPV4 packet packet found");
               System.out.println(packet);
             }
-//            if (packet.contains(UdpPacket.class)){
-//              System.out.println("Udp packet found");
+            if (packet.contains(UdpPacket.class)){
+              System.out.println("Udp packet found");
 //              System.out.println(packet);
-//            }
+            }
 //            if (packet.contains(IcmpV4CommonPacket.class)) {
 //              System.out.println("icmpv4 packet found");
 //              System.out.println(packet);

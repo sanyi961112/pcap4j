@@ -7,6 +7,7 @@
 
 package org.pcap4j.packet.factory.statik;
 
+import org.pcap4j.packet.DhcpV4Packet;
 import org.pcap4j.packet.DnsPacket;
 import org.pcap4j.packet.IllegalRawDataException;
 import org.pcap4j.packet.Packet;
@@ -35,6 +36,34 @@ public final class StaticTcpPortPacketFactory extends AbstractStaticPacketFactor
             return DnsPacket.class;
           }
         });
+    instantiaters.put(
+      TcpPort.BOOTPS,
+      new PacketInstantiater() {
+        @Override
+        public Packet newInstance(byte[] rawData, int offset, int length)
+          throws IllegalRawDataException {
+          return DhcpV4Packet.newPacket(rawData, offset, length);
+        }
+
+        @Override
+        public Class<DhcpV4Packet> getTargetClass() {
+          return DhcpV4Packet.class;
+        }
+      });
+    instantiaters.put(
+      TcpPort.BOOTPC,
+      new PacketInstantiater() {
+        @Override
+        public Packet newInstance(byte[] rawData, int offset, int length)
+          throws IllegalRawDataException {
+          return DhcpV4Packet.newPacket(rawData, offset, length);
+        }
+
+        @Override
+        public Class<DhcpV4Packet> getTargetClass() {
+          return DhcpV4Packet.class;
+        }
+      });
   }
 
   /** @return the singleton instance of StaticTcpPortPacketFactory. */

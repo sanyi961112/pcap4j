@@ -3,6 +3,11 @@ package org.pcap4j.packet.namednumber;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This is the same as ARP Hardware Type, but with Byte instead of Short
+ * since ARP uses 2 bytes for Hardware Type while DHCP uses 1 byte
+ * */
+
 public final class DhcpV4HardwareType extends NamedNumber<Byte, DhcpV4HardwareType> {
 
   /** Ethernet (10Mb): 1 */

@@ -11,6 +11,10 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Sandor Szabo
+ */
+
 public final class DhcpV4Packet extends AbstractPacket {
 
     private static final long serialVersionUID = 2600000000000000063L;

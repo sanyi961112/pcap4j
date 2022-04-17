@@ -30,7 +30,6 @@ public final class DhcpV4Packet extends AbstractPacket {
 
   private DhcpV4Packet(byte[] rawData, int offset, int length) throws IllegalRawDataException {
     this.header = new DhcpV4Header(rawData, offset, length);
-    System.out.println("DHCPv4 Header length: " + length + " bytes.");
   }
 
   private DhcpV4Packet(Builder builder) {
@@ -278,6 +277,8 @@ public final class DhcpV4Packet extends AbstractPacket {
     private static final int OPTIONS_SIZE = 24;
     private static final int DHCP_MIN_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
+    private int ACTUAL_HEADER_SIZE;
+
     private final DhcpV4Operation operationCode;
     private final DhcpV4HardwareType hardwareType;
     private final byte hardwareAddressLength;
@@ -297,6 +298,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     private final byte options;
 
     private DhcpV4Header(byte[] rawData, int offset, int length) throws IllegalRawDataException {
+      ACTUAL_HEADER_SIZE = length;
       if (length < DHCP_MIN_HEADER_SIZE) {
         StringBuilder sb = new StringBuilder(600);
         sb.append("The data is too short to build a DHCP header")
@@ -460,7 +462,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       StringBuilder sb = new StringBuilder();
       String ls = System.getProperty("line.separator");
 
-      sb.append("[DHCP Header (").append(length()).append(" bytes)]").append(ls);
+      sb.append("[DHCP Header (").append(ACTUAL_HEADER_SIZE).append(" bytes)]").append(ls);
       sb.append("  Operation code: ").append(getOperationCode()).append(ls);
       sb.append("  Hardware type: ").append(hardwareType).append(ls);
       sb.append("  Hardware address length: ").append(hardwareAddressLength).append(ls);

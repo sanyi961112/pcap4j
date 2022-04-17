@@ -278,6 +278,8 @@ public final class DhcpV4Packet extends AbstractPacket {
     private static final int DHCP_MIN_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
 
     private int ACTUAL_HEADER_SIZE;
+    private int ACTUAL_OPTIONS_OFFSET;
+    private int ACTUAL_OPTIONS_SIZE;
 
     private final DhcpV4Operation operationCode;
     private final DhcpV4HardwareType hardwareType;
@@ -299,6 +301,8 @@ public final class DhcpV4Packet extends AbstractPacket {
 
     private DhcpV4Header(byte[] rawData, int offset, int length) throws IllegalRawDataException {
       ACTUAL_HEADER_SIZE = length;
+      ACTUAL_OPTIONS_SIZE = length - OPTIONS_OFFSET;
+      ACTUAL_OPTIONS_OFFSET = OPTIONS_OFFSET;
       if (length < DHCP_MIN_HEADER_SIZE) {
         StringBuilder sb = new StringBuilder(600);
         sb.append("The data is too short to build a DHCP header")
@@ -331,6 +335,9 @@ public final class DhcpV4Packet extends AbstractPacket {
       this.options = ByteArrays.getByte(rawData, OPTIONS_OFFSET + offset);
     }
 
+    private void OptionsHandler(byte[] options, int length){
+
+    }
     private DhcpV4Header(Builder builder) {
       this.operationCode = builder.operationCode;
       this.hardwareType = builder.hardwareType;
@@ -479,7 +486,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       sb.append("  Server name: ").append(sname).append(ls);
       sb.append("  BOOT file: ").append(file).append(ls);
       sb.append("  Magic cookie: ").append(magic).append(ls);
-      sb.append("  Options: ").append(options).append(" bytes").append(ls);
+      sb.append("  Options: ").append(options).append(ls);
 
       return sb.toString();
     }

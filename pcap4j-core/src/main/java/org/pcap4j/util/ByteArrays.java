@@ -534,6 +534,30 @@ public final class ByteArrays {
     }
   }
 
+  public static DhcpV4Bytes getBytes(byte[] array, int offset) {
+    return getBytes(array, offset, ByteOrder.BIG_ENDIAN);
+  }
+
+  /**
+   * @param array array
+   * @param offset offset
+   * @param bo bo
+   * @return a new MacAddress object.
+   */
+  public static DhcpV4Bytes getBytes(byte[] array, int offset, ByteOrder bo) {
+    validateBounds(array, offset, DhcpV4Bytes.SIZE_IN_BYTES);
+
+    if (bo == null) {
+      throw new NullPointerException(" bo: " + bo);
+    }
+
+    if (bo.equals(LITTLE_ENDIAN)) {
+      return DhcpV4Bytes.getByAddress(reverse(getSubArray(array, offset, DhcpV4Bytes.SIZE_IN_BYTES)));
+    } else {
+      return DhcpV4Bytes.getByAddress(getSubArray(array, offset, DhcpV4Bytes.SIZE_IN_BYTES));
+    }
+  }
+
   /**
    * @param value value
    * @return byte array

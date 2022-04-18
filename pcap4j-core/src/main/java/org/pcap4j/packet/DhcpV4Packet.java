@@ -307,6 +307,8 @@ public final class DhcpV4Packet extends AbstractPacket {
     private final DhcpV4Bytes cookie;
     private final byte[] options;
 
+    private DhcpV4MessageTypes messageType;
+
     private DhcpV4Header(byte[] rawData, int offset, int length) throws IllegalRawDataException {
       ACTUAL_HEADER_SIZE = length;
       ACTUAL_OPTIONS_SIZE = length - OPTIONS_OFFSET;
@@ -340,8 +342,8 @@ public final class DhcpV4Packet extends AbstractPacket {
       this.file = ByteArrays.getByte(rawData, FILE_OFFSET + offset);
       this.cookie = ByteArrays.getBytes(rawData, COOKIE_OFFSET + offset);
       this.options = ByteArrays.getSubArray(rawData, OPTIONS_OFFSET + offset, ACTUAL_OPTIONS_SIZE);
+      this.messageType = DhcpV4MessageTypes.getInstance(ByteArrays.getByte(rawData,OPTIONS_OFFSET + offset + 2));
     }
-
 
     private DhcpV4Header(Builder builder) {
       this.operationCode = builder.operationCode;
@@ -361,9 +363,9 @@ public final class DhcpV4Packet extends AbstractPacket {
       this.file = builder.file;
       this.cookie = builder.cookie;
       this.options = builder.options;
+      this.messageType = builder.messageType;
     }
 
-    /*Getters*/
     public DhcpV4Operation getOperationCode() {
       return operationCode;
     }
@@ -432,6 +434,8 @@ public final class DhcpV4Packet extends AbstractPacket {
       return options;
     }
 
+    public DhcpV4MessageTypes getMessageType() { return messageType; }
+
     @Override
     protected List<byte[]> getRawFields() {
       List<byte[]> rawFields = new ArrayList<>();
@@ -458,12 +462,12 @@ public final class DhcpV4Packet extends AbstractPacket {
     private String optionsHandler(byte[] options, int length) {
       /**
        * Option number (1 byte), Option length(1byte), Option properties(Size: Option length-size)
+       * if Option number is 255, then end cycle
        */
       byte optionNumber = options[0];
       byte optionLength = options[1];
       byte optionMessageType = options[2];
-      DhcpV4MessageTypes messageType;
-
+      DhcpV4MessageTypes messageType = getMessageType();
 
       int dOptionNumber = Integer.decode(Byte.toString(optionNumber));
       int dOptionLength = Integer.decode(Byte.toString(optionLength));
@@ -471,6 +475,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       System.out.println(dOptionNumber + " ");
       System.out.println(dOptionLength);
       System.out.println(dOptionMessageType);
+      System.out.println(messageType);
       for (int i = 0; i < options.length; i++) {
 
       }
@@ -488,13 +493,13 @@ public final class DhcpV4Packet extends AbstractPacket {
       String xid = transactionIdentifier.toString();
       String xidString = xid.replace(":", "");
       String cookieString = cookie.toString();
-      String magic;
+      String magicCookie;
       String currentOptions = optionsHandler(options, ACTUAL_OPTIONS_SIZE);
 
       if (cookieString.equals("63:82:53:63")) {
-        magic = "DHCP";
+        magicCookie = "DHCP";
       } else {
-        magic = "Not DHCP";
+        magicCookie = "Not DHCP";
       }
       StringBuilder sb = new StringBuilder();
       String ls = System.getProperty("line.separator");
@@ -515,10 +520,8 @@ public final class DhcpV4Packet extends AbstractPacket {
       sb.append("  Client hardware address padding: ").append(chaddrPadding).append(ls);
       sb.append("  Server name: ").append(sname).append(ls);
       sb.append("  BOOT file: ").append(file).append(ls);
-      sb.append("  Magic cookie: ").append(magic).append(ls);
-//      sb.append("  Options size: ").append(ACTUAL_OPTIONS_SIZE).append(ls);
-//      sb.append("  Options: ").append(ByteArrays.toHexString(options, " ")).append(ls);
-      sb.append(currentOptions).append(ls);
+      sb.append("  Magic cookie: ").append(magicCookie).append(ls);
+      sb.append("  Message Type: ").append(messageType).append(ls);
 
       return sb.toString();
     }

@@ -472,10 +472,6 @@ public final class DhcpV4Packet extends AbstractPacket {
       int dOptionNumber = Integer.decode(Byte.toString(optionNumber));
       int dOptionLength = Integer.decode(Byte.toString(optionLength));
       int dOptionMessageType = Integer.decode(Byte.toString(optionMessageType));
-      System.out.println(dOptionNumber + " ");
-      System.out.println(dOptionLength);
-      System.out.println(dOptionMessageType);
-      System.out.println(messageType);
       for (int i = 0; i < options.length; i++) {
 
       }
@@ -505,7 +501,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       String ls = System.getProperty("line.separator");
 
       sb.append("[DHCP Header (").append(ACTUAL_HEADER_SIZE).append(" bytes)]").append(ls);
-      sb.append("  Operation code: ").append(getOperationCode()).append(ls);
+      sb.append("  Operation code: ").append(operationCode).append(ls);
       sb.append("  Hardware type: ").append(hardwareType).append(ls);
       sb.append("  Hardware address length: ").append(hardwareAddressLength).append(ls);
       sb.append("  Hops: ").append(hops).append(ls);

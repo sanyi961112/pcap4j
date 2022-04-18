@@ -538,12 +538,6 @@ public final class ByteArrays {
     return getBytes(array, offset, ByteOrder.BIG_ENDIAN);
   }
 
-  /**
-   * @param array array
-   * @param offset offset
-   * @param bo bo
-   * @return a new MacAddress object.
-   */
   public static DhcpV4Bytes getBytes(byte[] array, int offset, ByteOrder bo) {
     validateBounds(array, offset, DhcpV4Bytes.SIZE_IN_BYTES);
 

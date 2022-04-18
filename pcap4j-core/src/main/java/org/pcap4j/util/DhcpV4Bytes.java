@@ -4,8 +4,6 @@ import java.util.regex.Matcher;
 
 public final class DhcpV4Bytes extends LinkLayerAddress {
 
-  private static final long serialVersionUID = -8222662646993989547L;
-
   public static final DhcpV4Bytes DHCP_V4_BYTES =
     DhcpV4Bytes.getByAddress(
       new byte[] {(byte) 255, (byte) 255, (byte) 255, (byte) 255});

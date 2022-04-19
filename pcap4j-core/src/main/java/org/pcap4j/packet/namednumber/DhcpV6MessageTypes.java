@@ -43,13 +43,38 @@ public class DhcpV6MessageTypes extends NamedNumber<Byte, DhcpV6MessageTypes> {
   /** RECONFIGURE-REPLY: 19 */
   public static final DhcpV6MessageTypes RECONFIGURE_REPLY = new DhcpV6MessageTypes((byte) 19, "RECONFIGURE-REPLY");
   /** DHCPV4-QUERY: 20 */
-  public static final DhcpV6MessageTypes DHCPV4_QUERY = new DhcpV6MessageTypes((byte) 18, "DHCPV4-QUERY");
+  public static final DhcpV6MessageTypes DHCPV4_QUERY = new DhcpV6MessageTypes((byte) 20, "DHCPV4-QUERY");
   /** DHCPV4-RESPONSE: 21 */
-  public static final DhcpV6MessageTypes DHCPV4_RESPONSE = new DhcpV6MessageTypes((byte) 19, "DHCPV4-RESPONSE");
+  public static final DhcpV6MessageTypes DHCPV4_RESPONSE = new DhcpV6MessageTypes((byte) 21, "DHCPV4-RESPONSE");
   /** ACTIVELEASEQUERY: 22 */
-  public static final DhcpV6MessageTypes ACTIVELEASEQUERY = new DhcpV6MessageTypes((byte) 18, "ACTIVELEASEQUERY");
+  public static final DhcpV6MessageTypes ACTIVELEASEQUERY = new DhcpV6MessageTypes((byte) 22, "ACTIVELEASEQUERY");
   /** STARTTLS: 23 */
-  public static final DhcpV6MessageTypes STARTTLS = new DhcpV6MessageTypes((byte) 19, "STARTTLS");
+  public static final DhcpV6MessageTypes STARTTLS = new DhcpV6MessageTypes((byte) 23, "STARTTLS");
+  /** BNDUPD: 24 */
+  public static final DhcpV6MessageTypes BNDUPD = new DhcpV6MessageTypes((byte) 24, "BNDUPD");
+  /** BNDREPLY: 25 */
+  public static final DhcpV6MessageTypes BNDREPLY = new DhcpV6MessageTypes((byte) 25, "BNDREPLY");
+  /** POOLREQ: 26 */
+  public static final DhcpV6MessageTypes POOLREQ = new DhcpV6MessageTypes((byte) 26, "POOLREQ");
+  /** POOLRESP: 27 */
+  public static final DhcpV6MessageTypes POOLRESP = new DhcpV6MessageTypes((byte) 27, "POOLRESP");
+  /** UPDREQ: 28 */
+  public static final DhcpV6MessageTypes UPDREQ = new DhcpV6MessageTypes((byte) 28, "UPDREQ");
+  /** UPDREQALL: 29 */
+  public static final DhcpV6MessageTypes UPDREQALL = new DhcpV6MessageTypes((byte) 29, "UPDREQALL");
+  /** UPDDONE: 30 */
+  public static final DhcpV6MessageTypes UPDDONE = new DhcpV6MessageTypes((byte) 30, "UPDDONE");
+  /** CONNECT: 31 */
+  public static final DhcpV6MessageTypes CONNECT = new DhcpV6MessageTypes((byte) 31, "CONNECT");
+  /** CONNECTREPLY: 32 */
+  public static final DhcpV6MessageTypes CONNECTREPLY = new DhcpV6MessageTypes((byte) 32, "CONNECTREPLY");
+  /** DISCONNECT: 33 */
+  public static final DhcpV6MessageTypes DISCONNECT = new DhcpV6MessageTypes((byte) 33, "DISCONNECT");
+  /** STATE: 34 */
+  public static final DhcpV6MessageTypes STATE = new DhcpV6MessageTypes((byte) 34, "STATE");
+  /** CONTACT: 35 */
+  public static final DhcpV6MessageTypes CONTACT = new DhcpV6MessageTypes((byte) 35, "CONTACT");
+  /** 36-255 Unassigned*/
   private static final Map<Byte, DhcpV6MessageTypes> registry = new HashMap<Byte, DhcpV6MessageTypes>(30);
 
   static{
@@ -76,6 +101,18 @@ public class DhcpV6MessageTypes extends NamedNumber<Byte, DhcpV6MessageTypes> {
     registry.put(DHCPV4_RESPONSE.value(), DHCPV4_RESPONSE);
     registry.put(ACTIVELEASEQUERY.value(), ACTIVELEASEQUERY);
     registry.put(STARTTLS.value(), STARTTLS);
+    registry.put(BNDUPD.value(), BNDUPD);
+    registry.put(BNDREPLY.value(), BNDREPLY);
+    registry.put(POOLREQ.value(), POOLREQ);
+    registry.put(POOLRESP.value(), POOLRESP);
+    registry.put(UPDREQ.value(), UPDREQ);
+    registry.put(UPDREQALL.value(), UPDREQALL);
+    registry.put(UPDDONE.value(), UPDDONE);
+    registry.put(CONNECT.value(), CONNECT);
+    registry.put(CONNECTREPLY.value(), CONNECTREPLY);
+    registry.put(DISCONNECT.value(), DISCONNECT);
+    registry.put(STATE.value(), STATE);
+    registry.put(CONTACT.value(), CONTACT);
   }
 
   public DhcpV6MessageTypes(Byte value, String name) {

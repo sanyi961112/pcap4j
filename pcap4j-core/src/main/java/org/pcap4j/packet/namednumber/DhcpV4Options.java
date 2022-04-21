@@ -244,7 +244,7 @@ public class DhcpV4Options extends NamedNumber<Byte, DhcpV4Options> {
   /** Rapid Commit: 80 */
   public static final DhcpV4Options option80 = new DhcpV4Options((byte) 80, "Rapid Commit");
 
-  /** Client FQDN: 81 */
+  /** Client Fully Qualified Domain Name: 81 */
   public static final DhcpV4Options option81 = new DhcpV4Options((byte) 81, "Client FQDN");
 
   /** Relay Agent Information: 82 */

@@ -459,28 +459,39 @@ public final class DhcpV4Packet extends AbstractPacket {
       return rawFields;
     }
 
+    /** OPTIONS
+     * Option number (1 byte), Option length(1 byte), Option properties(Size: Option length-size)
+     */
     private String optionsHandler(byte[] options) {
-      /**
-       * Option number (1 byte), Option length(1 byte), Option properties(Size: Option length-size)
-       * if Option number is 255, then end cycle and return
-       */
       StringBuilder optionString = new StringBuilder();
       String ls = System.getProperty("line.separator");
-      DhcpV4Options option;
-      int decimalOptionValue;
-      byte[] optionBytes = new byte[10];
+      try{
+        DhcpV4Options option;
+        DhcpV4MessageTypes messageType;
+        int decimalOptionValue;
+        int dOptionLength = 0;
 
-      int dOptionLength = 0;
-      for (int i = 0; i < options.length; i+=i+2+dOptionLength) {
-        option = DhcpV4Options.getInstance(options[i]);
-        decimalOptionValue = Integer.decode(Byte.toString(option.value()));
-        dOptionLength = Integer.decode(Byte.toString(options[i+1]));
-        System.arraycopy(options, i+2, optionBytes,0, dOptionLength);
+        for (int i = 0; (i <= options.length); i+=2+dOptionLength) {
+          option = DhcpV4Options.getInstance(options[i]);
+          dOptionLength = Integer.decode(Byte.toString(options[i+1]));
           optionString.append(ls);
-          optionString.append("   Option " + option.value() + option.name()).append(ls);
-        if (decimalOptionValue == 255){
-          return optionString.toString();
+          decimalOptionValue = Integer.decode(Byte.toString(option.value()));
+          if(decimalOptionValue == 53){
+            messageType = DhcpV4MessageTypes.getInstance(options[i+2]);
+            optionString.append("   Option: (" + decimalOptionValue + ") " + option.name() + " " + messageType.name());
+            continue;
+          }
+          if(decimalOptionValue == -1){
+            decimalOptionValue = 255;
+          }
+          optionString.append("   Option: (" + decimalOptionValue + ") " + option.name());
+          if(decimalOptionValue == 255){
+            return optionString.toString();
+          }
         }
+        return optionString.toString();
+      } catch (Exception e){
+        System.out.println(e);
       }
       return optionString.toString();
     }

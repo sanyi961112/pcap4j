@@ -273,7 +273,7 @@ public final class DhcpV4Packet extends AbstractPacket {
     private static final int GIADDR_OFFSET = SIADDR_OFFSET + SIADDR_SIZE;
     private static final int GIADDR_SIZE = INET4_ADDRESS_SIZE_IN_BYTES;
     private static final int CHADDR_OFFSET = GIADDR_OFFSET + GIADDR_SIZE;
-    private static final int CHADDR_SIZE = 6;
+    private static final int CHADDR_SIZE = MacAddress.SIZE_IN_BYTES;
     private static final int CHADDRPADDING_OFFSET = CHADDR_OFFSET + CHADDR_SIZE;
     private static final int CHADDRPADDING_SIZE = 10;
     private static final int SNAME_OFFSET = CHADDRPADDING_OFFSET + CHADDRPADDING_SIZE;
@@ -459,24 +459,30 @@ public final class DhcpV4Packet extends AbstractPacket {
       return rawFields;
     }
 
-    private String optionsHandler(byte[] options, int length) {
+    private String optionsHandler(byte[] options) {
       /**
-       * Option number (1 byte), Option length(1byte), Option properties(Size: Option length-size)
-       * if Option number is 255, then end cycle
+       * Option number (1 byte), Option length(1 byte), Option properties(Size: Option length-size)
+       * if Option number is 255, then end cycle and return
        */
-      byte optionNumber = options[0];
-      byte optionLength = options[1];
-      byte optionMessageType = options[2];
-      DhcpV4MessageTypes messageType = getMessageType();
+      StringBuilder optionString = new StringBuilder();
+      String ls = System.getProperty("line.separator");
+      DhcpV4Options option;
+      int decimalOptionValue;
+      byte[] optionBytes = new byte[10];
 
-      int dOptionNumber = Integer.decode(Byte.toString(optionNumber));
-      int dOptionLength = Integer.decode(Byte.toString(optionLength));
-      int dOptionMessageType = Integer.decode(Byte.toString(optionMessageType));
-      for (int i = 0; i < options.length; i++) {
-
+      int dOptionLength = 0;
+      for (int i = 0; i < options.length; i+=i+2+dOptionLength) {
+        option = DhcpV4Options.getInstance(options[i]);
+        decimalOptionValue = Integer.decode(Byte.toString(option.value()));
+        dOptionLength = Integer.decode(Byte.toString(options[i+1]));
+        System.arraycopy(options, i+2, optionBytes,0, dOptionLength);
+          optionString.append(ls);
+          optionString.append("   Option " + option.value() + option.name()).append(ls);
+        if (decimalOptionValue == 255){
+          return optionString.toString();
+        }
       }
-      String optionString = "";
-      return optionString;
+      return optionString.toString();
     }
 
     @Override
@@ -490,7 +496,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       String xidString = xid.replace(":", "");
       String cookieString = cookie.toString();
       String magicCookie;
-      String currentOptions = optionsHandler(options, ACTUAL_OPTIONS_SIZE);
+      String currentOptions = optionsHandler(options);
 
       if (cookieString.equals("63:82:53:63")) {
         magicCookie = "DHCP";
@@ -517,7 +523,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       sb.append("  Server name: ").append(sname).append(ls);
       sb.append("  BOOT file: ").append(file).append(ls);
       sb.append("  Magic cookie: ").append(magicCookie).append(ls);
-      sb.append("  Message Type: ").append(messageType).append(ls);
+      sb.append("  Options: ").append(currentOptions).append(ls);
 
       return sb.toString();
     }

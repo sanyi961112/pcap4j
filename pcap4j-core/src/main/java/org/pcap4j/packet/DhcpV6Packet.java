@@ -4,11 +4,12 @@ import static org.pcap4j.util.ByteArrays.*;
 
 import org.pcap4j.packet.namednumber.DhcpV6MessageTypes;
 import org.pcap4j.util.ByteArrays;
+import org.pcap4j.util.DhcpV4Bytes;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DhcpV6Packet extends AbstractPacket {
+public final class DhcpV6Packet extends AbstractPacket {
 
   private final DhcpV6Header header;
 
@@ -47,7 +48,7 @@ public class DhcpV6Packet extends AbstractPacket {
 
   public static final class Builder extends AbstractBuilder {
     private DhcpV6MessageTypes messageType;
-    private byte[] transactionID;
+    private DhcpV4Bytes transactionID;
     private byte[] options;
 
     public Builder() {
@@ -59,12 +60,13 @@ public class DhcpV6Packet extends AbstractPacket {
       this.options = packet.header.options;
     }
 
+    /*Getters*/
     public DhcpV6Packet.Builder messageType(DhcpV6MessageTypes messageType) {
       this.messageType = messageType;
       return this;
     }
 
-    public DhcpV6Packet.Builder transactionID(byte[] transactionID) {
+    public DhcpV6Packet.Builder transactionID(DhcpV4Bytes transactionID) {
       this.transactionID = transactionID;
       return this;
     }
@@ -89,18 +91,19 @@ public class DhcpV6Packet extends AbstractPacket {
      * Options (Variable Length)
      */
 
-    private static final int MESSAGETYPE_OFFSET = 0;
+    private static final int MESSAGE_TYPE_OFFSET = 0;
 
-    private static final int MESSAGETYPE_SIZE = BYTE_SIZE_IN_BYTES;
-    private static final int TRANSACTION_ID_OFFSET = MESSAGETYPE_OFFSET + MESSAGETYPE_SIZE;
+    private static final int MESSAGE_TYPE_SIZE = BYTE_SIZE_IN_BYTES;
+    private static final int TRANSACTION_ID_OFFSET = MESSAGE_TYPE_OFFSET + MESSAGE_TYPE_SIZE;
     private static final int TRANSACTION_ID_SIZE = BYTE_SIZE_IN_BYTES * 3;
     private static final int OPTIONS_OFFSET = TRANSACTION_ID_OFFSET + TRANSACTION_ID_SIZE;
     private static final int OPTIONS_SIZE = 8;
     private static final int DHCP_MIN_HEADER_SIZE = OPTIONS_OFFSET + OPTIONS_SIZE;
+    private int DHCP_HEADER_SIZE;
 
     private final DhcpV6MessageTypes messageType;
 
-    private final byte[] transactionID;
+    private final DhcpV4Bytes transactionID;
 
     private final byte[] options;
 
@@ -118,8 +121,8 @@ public class DhcpV6Packet extends AbstractPacket {
         throw new IllegalRawDataException(sb.toString());
       }
 
-      this.messageType = DhcpV6MessageTypes.getInstance(ByteArrays.getByte(rawData, MESSAGETYPE_OFFSET + offset));
-      this.transactionID = (rawData);
+      this.messageType = DhcpV6MessageTypes.getInstance(ByteArrays.getByte(rawData, MESSAGE_TYPE_OFFSET + offset));
+      this.transactionID = ByteArrays.getBytes(rawData, TRANSACTION_ID_OFFSET + offset);
       this.options = (rawData);
 
     }
@@ -134,7 +137,7 @@ public class DhcpV6Packet extends AbstractPacket {
       return messageType;
     }
 
-    public byte[] getTransactionID() {
+    public DhcpV4Bytes getTransactionID() {
       return transactionID;
     }
 
@@ -146,8 +149,8 @@ public class DhcpV6Packet extends AbstractPacket {
     protected List<byte[]> getRawFields() {
       List<byte[]> rawFields = new ArrayList<>();
       rawFields.add(ByteArrays.toByteArray(messageType.value()));
-//        rawFields.add(ByteArrays.toByteArray(transactionID));
-//        rawFields.add(ByteArrays.toByteArray(options));
+      rawFields.add(ByteArrays.toByteArray(transactionID));
+      rawFields.add((options));
       return rawFields;
     }
 
@@ -158,12 +161,16 @@ public class DhcpV6Packet extends AbstractPacket {
 
     @Override
     protected String buildString() {
+      String xidString = transactionID.toString();
+      String xidShort = xidString.replace(":", "");
+      String xid = xidShort.substring(0,6);
+
       StringBuilder sb = new StringBuilder();
       String ls = System.getProperty("line.separator");
 
-      sb.append("[DHCPv6 Header (").append(length()).append(" bytes)]").append(ls);
+      sb.append("[DHCPv6 (").append(length()).append(" bytes)]").append(ls);
       sb.append("  Message type: ").append(getMessageType()).append(ls);
-      sb.append("  Transaction ID: ").append(transactionID).append(ls);
+      sb.append("  Transaction ID: 0x").append(xid).append(ls);
       sb.append("  Options: ").append(options).append(ls);
 
       return sb.toString();

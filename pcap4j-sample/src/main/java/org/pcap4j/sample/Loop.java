@@ -69,6 +69,11 @@ public class Loop {
               System.out.println(packet);
               System.out.println();
             }
+            if (packet.contains(DhcpV6Packet.class)) {
+              System.out.println("DHCPv6 packet found");
+              System.out.println(packet);
+              System.out.println();
+            }
 //            if (packet.contains(UdpPacket.class)){
 //              System.out.println("Udp packet found");
 //              System.out.println(packet);

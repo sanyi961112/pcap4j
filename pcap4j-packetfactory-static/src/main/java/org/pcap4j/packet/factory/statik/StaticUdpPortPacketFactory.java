@@ -7,11 +7,7 @@
 
 package org.pcap4j.packet.factory.statik;
 
-import org.pcap4j.packet.DnsPacket;
-import org.pcap4j.packet.DhcpV4Packet;
-import org.pcap4j.packet.GtpSelector;
-import org.pcap4j.packet.IllegalRawDataException;
-import org.pcap4j.packet.Packet;
+import org.pcap4j.packet.*;
 import org.pcap4j.packet.namednumber.UdpPort;
 
 /**
@@ -87,7 +83,6 @@ public final class StaticUdpPortPacketFactory extends AbstractStaticPacketFactor
           throws IllegalRawDataException {
           return DhcpV4Packet.newPacket(rawData, offset, length);
         }
-
         @Override
         public Class<DhcpV4Packet> getTargetClass() {
           return DhcpV4Packet.class;
@@ -101,10 +96,35 @@ public final class StaticUdpPortPacketFactory extends AbstractStaticPacketFactor
           throws IllegalRawDataException {
           return DhcpV4Packet.newPacket(rawData, offset, length);
         }
-
         @Override
         public Class<DhcpV4Packet> getTargetClass() {
           return DhcpV4Packet.class;
+        }
+      });
+    instantiaters.put(
+      UdpPort.DHCPV6_CLIENT,
+      new PacketInstantiater() {
+        @Override
+        public Packet newInstance(byte[] rawData, int offset, int length)
+          throws IllegalRawDataException {
+          return DhcpV6Packet.newPacket(rawData, offset, length);
+        }
+        @Override
+        public Class<DhcpV6Packet> getTargetClass() {
+          return DhcpV6Packet.class;
+        }
+      });
+    instantiaters.put(
+      UdpPort.DHCPV6_SERVER,
+      new PacketInstantiater() {
+        @Override
+        public Packet newInstance(byte[] rawData, int offset, int length)
+          throws IllegalRawDataException {
+          return DhcpV6Packet.newPacket(rawData, offset, length);
+        }
+        @Override
+        public Class<DhcpV6Packet> getTargetClass() {
+          return DhcpV6Packet.class;
         }
       });
   }

@@ -161,7 +161,7 @@ public class DhcpV4Options extends NamedNumber<Byte, DhcpV4Options> {
   public static final DhcpV4Options Overload = new DhcpV4Options((byte) 52, "Overload");
 
   /** DHCP Msg Type: 53 */
-  public static final DhcpV4Options DHCP_Msg_Type = new DhcpV4Options((byte) 53, "DHCP Msg Type");
+  public static final DhcpV4Options DHCP_Msg_Type = new DhcpV4Options((byte) 53, "DHCP Message Type");
 
   /** DHCP Server Id: 54 */
   public static final DhcpV4Options DHCP_Server_Id = new DhcpV4Options((byte) 54, "DHCP Server Id");
@@ -478,7 +478,7 @@ public class DhcpV4Options extends NamedNumber<Byte, DhcpV4Options> {
   /** End: 255 */
   public static final DhcpV4Options END = new DhcpV4Options((byte) 255, "End");
 
-  private static final Map<Byte, DhcpV4Options> registry = new HashMap<Byte, DhcpV4Options>(30);
+  private static final Map<Byte, DhcpV4Options> registry = new HashMap<>(30);
 
   static{
     registry.put(Subnet_Mask.value(), Subnet_Mask);

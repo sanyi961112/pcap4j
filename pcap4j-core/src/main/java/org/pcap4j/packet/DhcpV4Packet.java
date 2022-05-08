@@ -105,9 +105,9 @@ public final class DhcpV4Packet extends AbstractPacket {
     private InetAddress siaddr;
     private InetAddress giaddr;
     private MacAddress chaddr;
-    private byte chaddrPadding;
-    private byte sname;
-    private byte file;
+    private byte[] chaddrPadding;
+    private byte[] sname;
+    private byte[] file;
     private DhcpV4Bytes cookie;
     private byte[] options;
 
@@ -130,6 +130,7 @@ public final class DhcpV4Packet extends AbstractPacket {
       this.siaddr = packet.header.siaddr;
       this.giaddr = packet.header.giaddr;
       this.chaddr = packet.header.chaddr;
+      this.chaddrPadding = packet.header.chaddrPadding;
       this.sname = packet.header.sname;
       this.file = packet.header.file;
       this.cookie = packet.header.cookie;
@@ -162,7 +163,12 @@ public final class DhcpV4Packet extends AbstractPacket {
       return this;
     }
 
-    public Builder flags(byte flags) {
+    public Builder seconds(short seconds) {
+      this.seconds = seconds;
+      return this;
+    }
+
+    public Builder flags(short flags) {
       this.flags = flags;
       return this;
     }
@@ -192,12 +198,17 @@ public final class DhcpV4Packet extends AbstractPacket {
       return this;
     }
 
-    public Builder sname(byte sname) {
+    public Builder chaddrPadding(byte[] chaddrPadding) {
+      this.chaddrPadding = chaddrPadding;
+      return this;
+    }
+
+    public Builder sname(byte[] sname) {
       this.sname = sname;
       return this;
     }
 
-    public Builder file(byte file) {
+    public Builder file(byte[] file) {
       this.file = file;
       return this;
     }
@@ -222,6 +233,8 @@ public final class DhcpV4Packet extends AbstractPacket {
     public DhcpV4Packet build() {
       return new DhcpV4Packet(this);
     }
+
+
   }
 
   /**
@@ -301,9 +314,9 @@ public final class DhcpV4Packet extends AbstractPacket {
     private final InetAddress siaddr;
     private final InetAddress giaddr;
     private final MacAddress chaddr;
-    private final byte chaddrPadding;
-    private final byte sname;
-    private final byte file;
+    private final byte[] chaddrPadding;
+    private final byte[] sname;
+    private final byte[] file;
     private final DhcpV4Bytes cookie;
     private final byte[] options;
 
@@ -337,9 +350,9 @@ public final class DhcpV4Packet extends AbstractPacket {
       this.siaddr = ByteArrays.getInet4Address(rawData, SIADDR_OFFSET + offset);
       this.giaddr = ByteArrays.getInet4Address(rawData, GIADDR_OFFSET + offset);
       this.chaddr = ByteArrays.getMacAddress(rawData, CHADDR_OFFSET + offset);
-      this.chaddrPadding = ByteArrays.getByte(rawData, CHADDRPADDING_OFFSET + offset);
-      this.sname = ByteArrays.getByte(rawData, SNAME_OFFSET + offset);
-      this.file = ByteArrays.getByte(rawData, FILE_OFFSET + offset);
+      this.chaddrPadding = ByteArrays.getSubArray(rawData, CHADDRPADDING_OFFSET + offset, CHADDRPADDING_SIZE);
+      this.sname = ByteArrays.getSubArray(rawData, SNAME_OFFSET + offset, SNAME_SIZE);
+      this.file = ByteArrays.getSubArray(rawData, FILE_OFFSET + offset, FILE_SIZE);
       this.cookie = ByteArrays.getBytes(rawData, COOKIE_OFFSET + offset);
       this.options = ByteArrays.getSubArray(rawData, OPTIONS_OFFSET + offset, ACTUAL_OPTIONS_SIZE);
       this.messageType = DhcpV4MessageTypes.getInstance(ByteArrays.getByte(rawData,OPTIONS_OFFSET + offset + 2));
@@ -386,8 +399,8 @@ public final class DhcpV4Packet extends AbstractPacket {
       return transactionIdentifier;
     }
 
-    public byte getSeconds() {
-      return (byte) seconds;
+    public short getSeconds() {
+      return seconds;
     }
 
     public short getFlags() {
@@ -414,15 +427,15 @@ public final class DhcpV4Packet extends AbstractPacket {
       return chaddr;
     }
 
-    public MacAddress getChaddrPadding() {
-      return chaddr;
+    public byte[] getChaddrPadding() {
+      return chaddrPadding;
     }
 
-    public byte getSname() {
+    public byte[] getSname() {
       return sname;
     }
 
-    public byte getFile() {
+    public byte[] getFile() {
       return file;
     }
 
@@ -451,9 +464,9 @@ public final class DhcpV4Packet extends AbstractPacket {
       rawFields.add(ByteArrays.toByteArray(siaddr));
       rawFields.add(ByteArrays.toByteArray(giaddr));
       rawFields.add(ByteArrays.toByteArray(chaddr));
-      rawFields.add(ByteArrays.toByteArray(chaddrPadding));
-      rawFields.add(ByteArrays.toByteArray(sname));
-      rawFields.add(ByteArrays.toByteArray(file));
+      rawFields.add((chaddrPadding));
+      rawFields.add((sname));
+      rawFields.add((file));
       rawFields.add(ByteArrays.toByteArray(cookie));
       rawFields.add((options));
       return rawFields;
@@ -478,7 +491,7 @@ public final class DhcpV4Packet extends AbstractPacket {
           decimalOptionValue = Integer.decode(Byte.toString(option.value()));
           if(decimalOptionValue == 53){
             messageType = DhcpV4MessageTypes.getInstance(options[i+2]);
-            optionString.append("   Option: (" + decimalOptionValue + ") " + option.name() + " " + messageType.name());
+            optionString.append("   Option: (" + decimalOptionValue + ") " + option.name() + ": " + messageType.name());
             continue;
           }
           if(decimalOptionValue == -1){
@@ -530,12 +543,11 @@ public final class DhcpV4Packet extends AbstractPacket {
       sb.append("  Server IP address: ").append(siaddr).append(ls);
       sb.append("  Gateway IP address: ").append(giaddr).append(ls);
       sb.append("  Client hardware address: ").append(chaddr).append(ls);
-      sb.append("  Client hardware address padding: ").append(chaddrPadding).append(ls);
-      sb.append("  Server name: ").append(sname).append(ls);
-      sb.append("  BOOT file: ").append(file).append(ls);
+      sb.append("  Client hardware address padding: ").append(ByteArrays.toHexString(chaddrPadding, " ")).append(ls);
+      sb.append("  Server name: ").append(ByteArrays.toHexString(sname, " ")).append(ls);
+      sb.append("  BOOT file: ").append(ByteArrays.toHexString(file, " ")).append(ls);
       sb.append("  Magic cookie: ").append(magicCookie).append(ls);
       sb.append("  Options: ").append(currentOptions).append(ls);
-
       return sb.toString();
     }
 
@@ -583,9 +595,9 @@ public final class DhcpV4Packet extends AbstractPacket {
       result = 31 * result + siaddr.hashCode();
       result = 31 * result + giaddr.hashCode();
       result = 31 * result + chaddr.hashCode();
-      result = 31 * result + chaddrPadding;
-      result = 31 * result + sname;
-      result = 31 * result + file;
+      result = 31 * result + chaddrPadding.hashCode();
+      result = 31 * result + sname.hashCode();
+      result = 31 * result + file.hashCode();
       result = 31 * result + cookie.hashCode();
       result = 31 * result + options.hashCode();
       return result;

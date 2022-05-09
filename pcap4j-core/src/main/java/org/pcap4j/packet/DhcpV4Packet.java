@@ -482,9 +482,15 @@ public final class DhcpV4Packet extends AbstractPacket {
         DhcpV4Options option;
         DhcpV4MessageTypes messageType;
         int decimalOptionValue;
-        int dOptionLength = 0;
-
-        for (int i = 0; (i <= options.length); i+=2+dOptionLength) {
+        int dOptionLength;
+        for (int i = 0; (i <= options.length-1); i += 2 + dOptionLength) {
+          if(i == options.length-1){
+            option = DhcpV4Options.getInstance(options[i]);
+            decimalOptionValue = 255;
+            optionString.append(ls);
+            optionString.append("   Option: (" + decimalOptionValue + ") " + option.name());
+            return optionString.toString();
+          }
           option = DhcpV4Options.getInstance(options[i]);
           dOptionLength = Integer.decode(Byte.toString(options[i+1]));
           optionString.append(ls);
@@ -497,7 +503,11 @@ public final class DhcpV4Packet extends AbstractPacket {
           if(decimalOptionValue == -1){
             decimalOptionValue = 255;
           }
+          if(decimalOptionValue == 0){
+            return optionString.toString();
+          }
           optionString.append("   Option: (" + decimalOptionValue + ") " + option.name());
+
           if(decimalOptionValue == 255){
             return optionString.toString();
           }

@@ -5,22 +5,18 @@ import static org.junit.Assert.assertEquals;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pcap4j.packet.DhcpV4Packet;
+import org.pcap4j.packet.*;
 import org.pcap4j.packet.DhcpV4Packet.DhcpV4Header;
-import org.pcap4j.packet.IllegalRawDataException;
-import org.pcap4j.packet.Packet;
-import org.pcap4j.packet.SimpleBuilder;
-import org.pcap4j.packet.namednumber.DhcpV4HardwareType;
-import org.pcap4j.packet.namednumber.DhcpV4Operation;
-import org.pcap4j.packet.namednumber.EtherType;
+import org.pcap4j.packet.namednumber.*;
 import org.pcap4j.util.ByteArrays;
 import org.pcap4j.util.DhcpV4Bytes;
 import org.pcap4j.util.MacAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.pcap4j.packet.EthernetPacket.Builder;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 
 @SuppressWarnings("javadoc")
 public class DhcpV4PacketTest extends AbstractPacketTest {
@@ -92,18 +88,51 @@ public class DhcpV4PacketTest extends AbstractPacketTest {
   }
 
   @Override
-  protected Packet getPacket() throws Exception {
-    return packet;
-  }
+  protected Packet getPacket() { return packet; }
 
   @Override
   protected Packet getWholePacket() {
-    Builder eb = new Builder();
-    eb.dstAddr(packet.getHeader().getChaddr())
-      .srcAddr(packet.getHeader().getChaddr())
+    Inet4Address srcAddr;
+    Inet4Address dstAddr;
+    try {
+      srcAddr = (Inet4Address) InetAddress.getByName("192.0.0.12");
+      dstAddr = (Inet4Address) InetAddress.getByName("192.0.0.1");
+    } catch (UnknownHostException e) {
+      throw new AssertionError("Never get here.");
+    }
+
+    UdpPacket.Builder udpBuilder =
+      new UdpPacket.Builder()
+        .dstPort(UdpPort.BOOTPC)
+        .srcPort(UdpPort.BOOTPS)
+        .srcAddr(srcAddr)
+        .dstAddr(dstAddr)
+        .correctChecksumAtBuild(true)
+        .correctLengthAtBuild(true)
+        .payloadBuilder(new SimpleBuilder(packet));
+
+    IpV4Packet.Builder ipv4b = new IpV4Packet.Builder();
+    ipv4b
+      .version(IpVersion.IPV4)
+      .tos(IpV4Rfc1349Tos.newInstance((byte) 0))
+      .identification((short) 100)
+      .ttl((byte) 128)
+      .protocol(IpNumber.UDP)
+      .srcAddr(srcAddr)
+      .dstAddr(dstAddr)
+      .headerChecksum((byte) 0000)
+      .payloadBuilder(udpBuilder)
+      .correctChecksumAtBuild(true)
+      .correctLengthAtBuild(true);
+
+    EthernetPacket.Builder eb = new EthernetPacket.Builder();
+    eb.dstAddr(MacAddress.getByName("fe:00:00:00:00:02"))
+      .srcAddr(MacAddress.getByName("fe:00:00:00:00:01"))
       .type(EtherType.IPV4)
-      .payloadBuilder(new SimpleBuilder(packet))
+      .payloadBuilder(ipv4b)
       .paddingAtBuild(true);
+
+    eb.get(UdpPacket.Builder.class).dstAddr(dstAddr).srcAddr(srcAddr);
     return eb.build();
   }
 
@@ -142,28 +171,33 @@ public class DhcpV4PacketTest extends AbstractPacketTest {
 
     builder.operationCode(DhcpV4Operation.REQUEST);
     p = builder.build();
-    assertEquals((byte) 1, p.getHeader().getOperationCode());
+    assertEquals(new DhcpV4Operation((byte) 1, "Boot Request"), p.getHeader().getOperationCode());
 
     builder.operationCode(DhcpV4Operation.REPLY);
     p = builder.build();
-    assertEquals((byte) 2, p.getHeader().getOperationCode());
+    assertEquals(new DhcpV4Operation((byte) 2, "Boot Reply"), p.getHeader().getOperationCode());
 
-    builder.hops((byte)0);
-    builder.seconds((byte) 0);
+    builder.hops((byte) 1);
+    builder.seconds((byte) 1);
     p = builder.build();
-    assertEquals((byte) 0, p.getHeader().getHops());
-    assertEquals((byte) 0, p.getHeader().getSeconds());
+    assertEquals((byte) 1, p.getHeader().getHops());
+    assertEquals((byte) 1, p.getHeader().getSeconds());
 
-//    builder.hops((byte)1);
-//    builder.seconds((byte) 1);
-//    p = builder.build();
-//    assertEquals((byte) 1, p.getHeader().getHops());
-//    assertEquals((byte) 1, p.getHeader().getSeconds());
-//
-//    builder.hardwareAddressLength((byte) 1);
-//    builder.flags((byte) 1);
-//    p = builder.build();
-//
+    builder.hops((byte)1);
+    builder.seconds((byte) 1);
+    p = builder.build();
+    assertEquals((byte) 1, p.getHeader().getHops());
+    assertEquals((byte) 1, p.getHeader().getSeconds());
+
+    builder.hardwareAddressLength((byte) 1);
+    builder.flags((byte) 1);
+    p = builder.build();
+    assertEquals((byte) 1, p.getHeader().getHardwareAddressLength());
+    assertEquals((byte) 1, p.getHeader().getFlags());
+
+    builder.cookie(DhcpV4Bytes.DHCP_V4_BYTES);
+    p = builder.build();
+    assertEquals(DhcpV4Bytes.DHCP_V4_BYTES, p.getHeader().getCookie());
 
   }
 
@@ -178,5 +212,7 @@ public class DhcpV4PacketTest extends AbstractPacketTest {
   }
 
   @Test
-  public void testNewPacketRandom() { RandomPacketTester.testClass(DhcpV4Packet.class, packet);}
+  public void testNewPacketRandom() {
+    RandomPacketTester.testClass(DhcpV4Packet.class, packet);
+  }
 }

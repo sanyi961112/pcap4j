@@ -171,7 +171,7 @@ public final class DhcpV6Packet extends AbstractPacket {
       sb.append("[DHCPv6 (").append(length()).append(" bytes)]").append(ls);
       sb.append("  Message type: ").append(getMessageType()).append(ls);
       sb.append("  Transaction ID: 0x").append(xid).append(ls);
-      sb.append("  Options: ").append(options).append(ls);
+      sb.append("  Options: ").append(ByteArrays.toHexString(options," ")).append(ls);
 
       return sb.toString();
     }

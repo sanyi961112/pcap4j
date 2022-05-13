@@ -61,7 +61,7 @@ public class BootstrapPacket extends AbstractPacket {
         .append(builder.sname)
         .append(" builder.file: ")
         .append(builder.file)
-        .append(" builder.options: ")
+        .append(" builder.vendorExtensions: ")
         .append(builder.vendorExtensions);
       throw new NullPointerException(sb.toString());
     }
